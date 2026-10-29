@@ -1,0 +1,19 @@
+RewriteEngine On
+
+# --- URLs amigables (rutas específicas primero) ---
+RewriteRule ^encuestas/([0-9]+)/informe/?$  index.php?action=informe&id=$1 [L]
+RewriteRule ^encuestas/([0-9]+)/excel/?$    index.php?action=descargar_excel&id=$1 [L]
+RewriteRule ^encuestas/([0-9]+)/?$          index.php?action=encuestas&subaction=ver&id=$1 [L]
+RewriteRule ^encuestas/?$                   index.php?action=encuestas [L]
+RewriteRule ^responder/([0-9]+)/?$          index.php?action=responder&id=$1 [L]
+RewriteRule ^banco/([0-9]+)/?$              index.php?action=banco&encuesta_id=$1 [L]
+RewriteRule ^banco/?$                       index.php?action=banco [L]
+RewriteRule ^imagenes/?$                    index.php?action=imagenes [L]
+RewriteRule ^login/?$                       index.php?action=login [L]
+RewriteRule ^salir/?$                       index.php?action=logout [L]
+RewriteRule ^$                              index.php?action=login [L]
+
+# --- Fallback: no reescribir archivos ni directorios reales ---
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php?action=$1 [QSA,L]
