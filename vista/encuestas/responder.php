@@ -179,17 +179,24 @@ if(isset($_GET['debug']) && $_GET['debug'] == '1'){
         .sat-num{font-size:14px;font-weight:700;color:var(--text2);}
         .sat-item.sat-selected .sat-num{color:var(--accent);}
         .sat-item.sat-selected .sat-label{color:var(--accent);}
-        .mat-wrap{overflow-x:auto;border:1.5px solid var(--border-strong);border-radius:var(--rs);}
-        .mat-table{width:100%;border-collapse:collapse;font-size:13px;min-width:640px;}
-        .mat-table th{background:#2f6fb5;color:#fff;font-weight:700;padding:10px 12px;text-align:center;border:1px solid rgba(255,255,255,.25);}
-        .mat-table td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle;}
-        .mat-table td.mat-n{text-align:center;font-weight:700;width:44px;}
-        .mat-table td.mat-asp{font-weight:700;color:#1f3a5f;width:22%;}
-        .mat-table td.mat-nec{color:var(--text);}
-        .mat-table td.mat-sel{background:#fff3d6;width:19%;}
-        .mat-select{width:100%;padding:8px 10px;border:1.5px solid var(--border-strong);border-radius:8px;font-size:13px;font-family:inherit;background:#fff;color:var(--text);}
-        .mat-select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--al);}
-        @media(max-width:768px){.mat-table{min-width:0;}.mat-table thead{display:none;}.mat-table tr{display:block;border-bottom:2px solid var(--border-strong);padding:8px 0;}.mat-table td{display:block;border:0;width:auto!important;padding:4px 12px;}.mat-table td.mat-n{display:none;}.mat-table td.mat-sel::before{content:attr(data-label);display:block;font-size:11px;font-weight:600;color:var(--text2);margin-bottom:4px;}}
+        .mat-title{background:#1f3864;color:#fff;font-weight:800;font-size:15px;letter-spacing:.2px;padding:10px 14px;border-radius:8px 8px 0 0;margin-bottom:0!important;}
+        .mat-wrap{overflow-x:auto;border:1px solid #c9d1dc;border-top:0;border-radius:0 0 8px 8px;background:#fff;}
+        .mat-table{width:100%;border-collapse:collapse;font-size:13px;min-width:720px;}
+        .mat-table th{padding:10px 12px;text-align:center;font-weight:700;color:#1f2d3d;background:#f2f2f2;border:1px solid #c9d1dc;vertical-align:middle;}
+        .mat-table th.mat-nec{background:#2e75b6;color:#fff;line-height:1.3;}
+        .mat-table th.mat-nec small{display:block;font-weight:600;font-size:12px;}
+        .mat-table th.mat-sel{background:#dce6f1;color:#1f2d3d;}
+        .mat-table tr.mat-ej td{font-style:italic;color:#8a8f98;font-size:12px;padding:8px 12px;border:1px solid #c9d1dc;background:#fff;text-align:left;}
+        .mat-table tr.mat-ej td.mat-n{text-align:center;}
+        .mat-table tr.mat-ej td.mat-sel{text-align:center;background:#fff;}
+        .mat-table td{padding:10px 12px;border:1px solid #c9d1dc;vertical-align:middle;}
+        .mat-table td.mat-n{text-align:center;font-weight:700;width:44px;color:#1f2d3d;}
+        .mat-table td.mat-asp{font-weight:700;color:#1f3864;width:20%;background:#fff;}
+        .mat-table td.mat-nec{color:#1c1c1e;background:#f5f8fc;}
+        .mat-table td.mat-sel{background:#fdebc8;width:19%;}
+        .mat-select{width:100%;padding:7px 8px;border:1px solid #c9b98f;border-radius:4px;font-size:13px;font-family:inherit;background:#fff8e6;color:var(--text);}
+        .mat-select:focus{outline:none;border-color:#217346;box-shadow:0 0 0 2px rgba(33,115,70,.25);}
+        @media(max-width:768px){.mat-table{min-width:0;}.mat-table thead,.mat-table tr.mat-ej{display:none;}.mat-table tr{display:block;border-bottom:2px solid #c9d1dc;padding:8px 0;}.mat-table td{display:block;border:0;width:auto!important;padding:4px 12px;}.mat-table td.mat-n{display:none;}.mat-table td.mat-sel::before{content:attr(data-label);display:block;font-size:11px;font-weight:600;color:var(--text2);margin-bottom:4px;}}
         .mobile-timer-strip{display:none;align-items:center;gap:10px;margin-top:12px;padding:10px 16px;background:linear-gradient(135deg,#1c1c1e,#2c2c2e);border-radius:12px;opacity:var(--op-sidebar,1);box-shadow:0 2px 10px rgba(0,0,0,.25);}
         .mobile-timer-val{font-size:15px;font-weight:700;letter-spacing:-.3px;color:#fff;}
         .mobile-timer-sub{font-size:11px;color:rgba(255,255,255,.45);}
@@ -401,7 +408,7 @@ if(isset($_GET['debug']) && $_GET['debug'] == '1'){
                                 </div>
                                 <?php else: ?>
                                 <!-- Preguntas normales -->
-                                <div class="q-label">
+                                <div class="q-label<?php echo $preg['tipo_pregunta']==='matriz' ? ' mat-title' : ''; ?>">
                                     <?php echo nl2br(textoConEnlaces($preg['pregunta'])); ?>
                                     <?php if($preg['requerido']): ?><span class="q-req">*</span><?php endif; ?>
                                     <?php if($esCond): ?><span class="q-badge"><i class="fas fa-code-branch"></i> Condicional</span><?php endif; ?>
@@ -465,12 +472,19 @@ if(isset($_GET['debug']) && $_GET['debug'] == '1'){
                                             <tr>
                                                 <th class="mat-n">N°</th>
                                                 <th class="mat-asp">Aspecto</th>
-                                                <th class="mat-nec">Necesidad</th>
+                                                <th class="mat-nec">NECESIDAD<small>Lo que usted REQUIERE</small></th>
                                                 <th class="mat-sel"><?php echo htmlspecialchars($matColImp); ?></th>
                                                 <th class="mat-sel"><?php echo htmlspecialchars($matColSat); ?></th>
                                             </tr>
                                         </thead>
                                         <tbody>
+                                            <tr class="mat-ej">
+                                                <td class="mat-n">Ej.</td>
+                                                <td class="mat-asp" style="font-weight:400;font-style:italic;color:#8a8f98;">Cafetería</td>
+                                                <td class="mat-nec" style="background:#fff;">Alimentación a precio justo en el campus.</td>
+                                                <td class="mat-sel">5 Muy importante</td>
+                                                <td class="mat-sel">3 Ni satisfecho ni insatisfecho</td>
+                                            </tr>
                                         <?php foreach(array_values($matFilas) as $mi => $mf): ?>
                                             <tr>
                                                 <td class="mat-n"><?php echo $mi + 1; ?></td>
