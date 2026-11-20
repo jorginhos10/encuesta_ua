@@ -267,7 +267,7 @@
             </div>
             <div id="p-mat-box" style="display:none;">
                 <div class="tb"><div class="tb-title"><i class="fas fa-table"></i> Matriz Importancia / Satisfacción</div>
-                    <div style="display:flex;gap:10px;margin-bottom:14px;"><div style="flex:1"><label class="fl" style="font-size:11px;">Título columna Importancia</label><input class="fi" type="text" id="p-mat-ci" placeholder="¿Qué tan IMPORTANTE es para usted?" style="margin-top:4px;"></div><div style="flex:1"><label class="fl" style="font-size:11px;">Título columna Cumplimiento</label><input class="fi" type="text" id="p-mat-cs" placeholder="¿Qué tanto se CUMPLE esta necesidad?" style="margin-top:4px;"></div></div>
+                    <div style="display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap;"><div style="flex:0 0 70px"><label class="fl" style="font-size:11px;">Col. N°</label><input class="fi" type="text" id="p-mat-cn" placeholder="N°" style="margin-top:4px;"></div><div style="flex:1;min-width:110px"><label class="fl" style="font-size:11px;">Col. Aspecto</label><input class="fi" type="text" id="p-mat-ca" placeholder="Aspecto" style="margin-top:4px;"></div><div style="flex:1;min-width:110px"><label class="fl" style="font-size:11px;">Col. Necesidad</label><input class="fi" type="text" id="p-mat-cnec" placeholder="NECESIDAD" style="margin-top:4px;"></div><div style="flex:1;min-width:110px"><label class="fl" style="font-size:11px;">Subtítulo Necesidad</label><input class="fi" type="text" id="p-mat-cnecs" placeholder="Lo que usted REQUIERE" style="margin-top:4px;"></div></div><div style="display:flex;gap:10px;margin-bottom:14px;"><div style="flex:1"><label class="fl" style="font-size:11px;">Título columna Importancia</label><input class="fi" type="text" id="p-mat-ci" placeholder="¿Qué tan IMPORTANTE es para usted?" style="margin-top:4px;"></div><div style="flex:1"><label class="fl" style="font-size:11px;">Título columna Cumplimiento</label><input class="fi" type="text" id="p-mat-cs" placeholder="¿Qué tanto se CUMPLE esta necesidad?" style="margin-top:4px;"></div></div>
                     <div id="p-mat-list"></div><button class="add-tc" onclick="addMatFila()"><i class="fas fa-plus"></i> Agregar fila</button></div>
             </div>
             <div id="p-req-box"><label class="cbr"><input type="checkbox" id="p-req" checked><span><i class="fas fa-asterisk" style="color:var(--red);margin-right:5px;"></i> Respuesta requerida</span></label></div>
@@ -309,7 +309,7 @@
             </div>
             <div id="e-mat-box" style="display:none;">
                 <div class="tb"><div class="tb-title"><i class="fas fa-table"></i> Matriz Importancia / Satisfacción</div>
-                    <div style="display:flex;gap:10px;margin-bottom:14px;"><div style="flex:1"><label class="fl" style="font-size:11px;">Título columna Importancia</label><input class="fi" type="text" id="e-mat-ci" placeholder="¿Qué tan IMPORTANTE es para usted?" style="margin-top:4px;"></div><div style="flex:1"><label class="fl" style="font-size:11px;">Título columna Cumplimiento</label><input class="fi" type="text" id="e-mat-cs" placeholder="¿Qué tanto se CUMPLE esta necesidad?" style="margin-top:4px;"></div></div>
+                    <div style="display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap;"><div style="flex:0 0 70px"><label class="fl" style="font-size:11px;">Col. N°</label><input class="fi" type="text" id="e-mat-cn" placeholder="N°" style="margin-top:4px;"></div><div style="flex:1;min-width:110px"><label class="fl" style="font-size:11px;">Col. Aspecto</label><input class="fi" type="text" id="e-mat-ca" placeholder="Aspecto" style="margin-top:4px;"></div><div style="flex:1;min-width:110px"><label class="fl" style="font-size:11px;">Col. Necesidad</label><input class="fi" type="text" id="e-mat-cnec" placeholder="NECESIDAD" style="margin-top:4px;"></div><div style="flex:1;min-width:110px"><label class="fl" style="font-size:11px;">Subtítulo Necesidad</label><input class="fi" type="text" id="e-mat-cnecs" placeholder="Lo que usted REQUIERE" style="margin-top:4px;"></div></div><div style="display:flex;gap:10px;margin-bottom:14px;"><div style="flex:1"><label class="fl" style="font-size:11px;">Título columna Importancia</label><input class="fi" type="text" id="e-mat-ci" placeholder="¿Qué tan IMPORTANTE es para usted?" style="margin-top:4px;"></div><div style="flex:1"><label class="fl" style="font-size:11px;">Título columna Cumplimiento</label><input class="fi" type="text" id="e-mat-cs" placeholder="¿Qué tanto se CUMPLE esta necesidad?" style="margin-top:4px;"></div></div>
                     <div id="e-mat-list"></div><button class="add-tc" onclick="addMatFilaE()"><i class="fas fa-plus"></i> Agregar fila</button></div>
             </div>
             <div id="e-req-box"><label class="cbr"><input type="checkbox" id="e-req"><span><i class="fas fa-asterisk" style="color:var(--red);margin-right:5px;"></i> Requerida</span></label></div>
@@ -527,7 +527,7 @@ function renderMat(pre){
 function addMatFila(){matC.push({aspecto:'',necesidad:''});renderMat('p');}
 function addMatFilaE(){matE.push({aspecto:'',necesidad:''});renderMat('e');}
 function matOpts(pre){
-    return JSON.stringify({col_importancia:g(pre+'-mat-ci').value.trim()||'¿Qué tan IMPORTANTE es para usted?',col_satisfaccion:g(pre+'-mat-cs').value.trim()||'¿Qué tanto se CUMPLE esta necesidad?',filas:matArr(pre).filter(f=>f.aspecto.trim())});
+    return JSON.stringify({col_n:g(pre+'-mat-cn').value.trim()||'N°',col_aspecto:g(pre+'-mat-ca').value.trim()||'Aspecto',col_necesidad:g(pre+'-mat-cnec').value.trim()||'NECESIDAD',col_necesidad_sub:g(pre+'-mat-cnecs').value.trim()||'Lo que usted REQUIERE',col_importancia:g(pre+'-mat-ci').value.trim()||'¿Qué tan IMPORTANTE es para usted?',col_satisfaccion:g(pre+'-mat-cs').value.trim()||'¿Qué tanto se CUMPLE esta necesidad?',filas:matArr(pre).filter(f=>f.aspecto.trim())});
 }
 
 // Modal Sección
@@ -565,7 +565,7 @@ function guardarOrdenSecciones(){
 
 // Modal Pregunta
 function abrirModalPregunta(eid){
-    optsC=[];tinderC=[];matC=[];g('p-mat-ci').value='';g('p-mat-cs').value='';
+    optsC=[];tinderC=[];matC=[];g('p-mat-ci').value='';['cn','ca','cnec','cnecs'].forEach(k=>g('p-mat-'+k).value='');g('p-mat-cs').value='';
     g('p-enc-id').value=eid;g('p-texto').value='';g('p-tipo').value='texto_corto';
     g('p-req').checked=true;g('p-banco').checked=false;
     g('p-label-si').value='Me gusta';g('p-label-no').value='No me gusta';
@@ -675,9 +675,9 @@ function abrirEditar(id){
         g('e-req').checked=p.requerido==1||p.requerido==='1';
 
         // ── CARGAR OPCIONES / TARJETAS ──
-        optsE=[];tinderE=[];matE=[];g('e-mat-ci').value='';g('e-mat-cs').value='';
+        optsE=[];tinderE=[];matE=[];g('e-mat-ci').value='';['cn','ca','cnec','cnecs'].forEach(k=>g('e-mat-'+k).value='');g('e-mat-cs').value='';
         if(tipoFinal==='matriz'&&p.opciones){
-            try{const m=JSON.parse(p.opciones);matE=Array.isArray(m.filas)?m.filas.map(f=>({aspecto:f.aspecto||'',necesidad:f.necesidad||''})):[];g('e-mat-ci').value=m.col_importancia||'';g('e-mat-cs').value=m.col_satisfaccion||'';}catch(e){}
+            try{const m=JSON.parse(p.opciones);matE=Array.isArray(m.filas)?m.filas.map(f=>({aspecto:f.aspecto||'',necesidad:f.necesidad||''})):[];g('e-mat-cn').value=m.col_n||'';g('e-mat-ca').value=m.col_aspecto||'';g('e-mat-cnec').value=m.col_necesidad||'';g('e-mat-cnecs').value=m.col_necesidad_sub||'';g('e-mat-ci').value=m.col_importancia||'';g('e-mat-cs').value=m.col_satisfaccion||'';}catch(e){}
         }
         if(tipoFinal==='tinder' && p.opciones){
             try{

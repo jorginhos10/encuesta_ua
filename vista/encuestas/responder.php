@@ -482,15 +482,19 @@ if(isset($_GET['debug']) && $_GET['debug'] == '1'){
                                     $matColSat = $matCfg['col_satisfaccion'] ?? '¿Qué tanto se CUMPLE esta necesidad?';
                                     $matEscImp = ['5'=>'Muy importante','4'=>'Importante','3'=>'Moderadamente importante','2'=>'Poco importante','1'=>'Nada importante','na'=>'No aplica'];
                                     $matEscSat = ['5'=>'😊 Se cumple totalmente','4'=>'🙂 Cumple en gran parte','3'=>'🫤 Cumple parcialmente','2'=>'🙁 Cumple poco','1'=>'😞 No se cumple','na'=>'No aplica'];
+                                    $matColN    = $matCfg['col_n'] ?? 'N°';
+                                    $matColAsp  = $matCfg['col_aspecto'] ?? 'Aspecto';
+                                    $matColNec  = $matCfg['col_necesidad'] ?? 'NECESIDAD';
+                                    $matColNecS = $matCfg['col_necesidad_sub'] ?? 'Lo que usted REQUIERE';
                                     $matReq = (!$esCond && $preg['requerido']) ? 'required' : '';
                                 ?>
                                     <div class="mat-wrap">
                                     <table class="mat-table">
                                         <thead>
                                             <tr>
-                                                <th class="mat-n">N°</th>
-                                                <th class="mat-asp">Aspecto</th>
-                                                <th class="mat-nec">NECESIDAD<small>Lo que usted REQUIERE</small></th>
+                                                <th class="mat-n"><?php echo htmlspecialchars($matColN); ?></th>
+                                                <th class="mat-asp"><?php echo htmlspecialchars($matColAsp); ?></th>
+                                                <th class="mat-nec"><?php echo htmlspecialchars($matColNec); ?><?php if($matColNecS !== ''): ?><small><?php echo htmlspecialchars($matColNecS); ?></small><?php endif; ?></th>
                                                 <th class="mat-sel"><?php echo htmlspecialchars($matColImp); ?></th>
                                                 <th class="mat-sel"><?php echo htmlspecialchars($matColSat); ?></th>
                                             </tr>
