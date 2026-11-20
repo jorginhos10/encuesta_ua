@@ -181,7 +181,7 @@ if(isset($_GET['debug']) && $_GET['debug'] == '1'){
         .sat-item.sat-selected .sat-label{color:var(--accent);}
         .mat-title{background:transparent;color:var(--text);font-weight:700;font-size:17px;letter-spacing:-.2px;padding:0 2px 12px;margin-bottom:0!important;}
         .mat-wrap{overflow-x:auto;border:1px solid rgba(0,0,0,.08);border-radius:18px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.04),0 8px 24px rgba(0,0,0,.05);}
-        .mat-table{width:100%;border-collapse:separate;border-spacing:0;font-size:14px;min-width:760px;}
+        .mat-table{width:100%;border-collapse:separate;border-spacing:0;font-size:14px;min-width:620px;}
         .mat-table th{padding:14px 16px;text-align:center;font-weight:600;font-size:12px;letter-spacing:.2px;color:#636366;background:rgba(246,246,248,.9);border-bottom:1px solid rgba(0,0,0,.08);vertical-align:middle;}
         .mat-table th.mat-asp,.mat-table th.mat-nec{text-align:left;}
         .mat-table th.mat-nec{color:var(--accent);}
@@ -195,7 +195,7 @@ if(isset($_GET['debug']) && $_GET['debug'] == '1'){
         .mat-table td.mat-n{text-align:center;font-weight:600;width:48px;color:#aeaeb2;}
         .mat-table td.mat-asp{font-weight:600;color:var(--text);width:20%;line-height:1.35;letter-spacing:-.1px;}
         .mat-table td.mat-nec{color:#636366;line-height:1.5;}
-        .mat-table td.mat-sel{width:19%;}
+        .mat-table td.mat-sel{width:28%;}
         .mat-table tbody tr:not(.mat-ej):hover td{background:rgba(0,122,255,.025);}
         .mat-select{width:100%;padding:10px 34px 10px 14px;border:0;border-radius:12px;font-size:14px;font-family:inherit;background:#f2f2f7 url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='14' viewBox='0 0 10 14'><path d='M2 5l3-3 3 3M2 9l3 3 3-3' fill='none' stroke='%238e8e93' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/></svg>") no-repeat right 12px center;color:#8e8e93;appearance:none;-webkit-appearance:none;cursor:pointer;transition:background-color .15s,box-shadow .15s,color .15s;text-overflow:ellipsis;}
         .mat-select:hover{background-color:#e9e9ef;}
@@ -478,10 +478,8 @@ if(isset($_GET['debug']) && $_GET['debug'] == '1'){
                                     $matCfg = json_decode($preg['opciones'] ?? '{}', true);
                                     if(!is_array($matCfg)) $matCfg = [];
                                     $matFilas = is_array($matCfg['filas'] ?? null) ? $matCfg['filas'] : [];
-                                    $matColImp = $matCfg['col_importancia'] ?? '¿Qué tan IMPORTANTE es para usted?';
-                                    $matColSat = $matCfg['col_satisfaccion'] ?? '¿Qué tan SATISFECHO está?';
-                                    $matEscImp = ['1'=>'Nada importante','2'=>'Poco importante','3'=>'Medianamente importante','4'=>'Importante','5'=>'Muy importante'];
-                                    $matEscSat = ['1'=>'Muy insatisfecho','2'=>'Insatisfecho','3'=>'Ni satisfecho ni insatisfecho','4'=>'Satisfecho','5'=>'Muy satisfecho'];
+                                    $matColImp = $matCfg['col_importancia'] ?? 'Nivel de necesidad';
+                                    $matEscImp = ['5'=>'Muy importante','4'=>'Importante','3'=>'Moderadamente importante','2'=>'Poco importante','1'=>'Nada importante','na'=>'No aplica'];
                                     $matReq = (!$esCond && $preg['requerido']) ? 'required' : '';
                                 ?>
                                     <div class="mat-wrap">
@@ -492,7 +490,6 @@ if(isset($_GET['debug']) && $_GET['debug'] == '1'){
                                                 <th class="mat-asp">Aspecto</th>
                                                 <th class="mat-nec">NECESIDAD<small>Lo que usted REQUIERE</small></th>
                                                 <th class="mat-sel"><?php echo htmlspecialchars($matColImp); ?></th>
-                                                <th class="mat-sel"><?php echo htmlspecialchars($matColSat); ?></th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -501,7 +498,6 @@ if(isset($_GET['debug']) && $_GET['debug'] == '1'){
                                                 <td class="mat-asp" style="font-weight:400;font-style:italic;color:#8a8f98;">Cafetería</td>
                                                 <td class="mat-nec" style="background:#fff;">Alimentación a precio justo en el campus.</td>
                                                 <td class="mat-sel">5 Muy importante</td>
-                                                <td class="mat-sel">3 Ni satisfecho ni insatisfecho</td>
                                             </tr>
                                         <?php foreach(array_values($matFilas) as $mi => $mf): ?>
                                             <tr>
@@ -509,15 +505,9 @@ if(isset($_GET['debug']) && $_GET['debug'] == '1'){
                                                 <td class="mat-asp"><?php echo htmlspecialchars($mf['aspecto'] ?? ''); ?></td>
                                                 <td class="mat-nec"><?php echo htmlspecialchars($mf['necesidad'] ?? ''); ?></td>
                                                 <td class="mat-sel" data-label="<?php echo htmlspecialchars($matColImp); ?>">
-                                                    <select class="mat-select" name="pregunta_<?php echo $preg['id']; ?>[<?php echo $mi; ?>][imp]" <?php echo $matReq; ?> <?php echo $esCond ? 'disabled' : ''; ?> data-required="<?php echo $preg['requerido']?1:0; ?>">
+                                                    <select class="mat-select" name="pregunta_<?php echo $preg['id']; ?>[<?php echo $mi; ?>][niv]" <?php echo $matReq; ?> <?php echo $esCond ? 'disabled' : ''; ?> data-required="<?php echo $preg['requerido']?1:0; ?>">
                                                         <option value="">Seleccione…</option>
-                                                        <?php foreach($matEscImp as $v => $l): ?><option value="<?php echo $v; ?>"><?php echo $v.' '.$l; ?></option><?php endforeach; ?>
-                                                    </select>
-                                                </td>
-                                                <td class="mat-sel" data-label="<?php echo htmlspecialchars($matColSat); ?>">
-                                                    <select class="mat-select" name="pregunta_<?php echo $preg['id']; ?>[<?php echo $mi; ?>][sat]" <?php echo $matReq; ?> <?php echo $esCond ? 'disabled' : ''; ?> data-required="<?php echo $preg['requerido']?1:0; ?>">
-                                                        <option value="">Seleccione…</option>
-                                                        <?php foreach($matEscSat as $v => $l): ?><option value="<?php echo $v; ?>"><?php echo $v.' '.$l; ?></option><?php endforeach; ?>
+                                                        <?php foreach($matEscImp as $v => $l): ?><option value="<?php echo $v; ?>"><?php echo ($v === 'na' ? '' : $v.' ').$l; ?></option><?php endforeach; ?>
                                                     </select>
                                                 </td>
                                             </tr>

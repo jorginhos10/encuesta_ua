@@ -262,10 +262,14 @@ class RespuestaControlador {
                     $filasDef = is_array($cfg['filas'] ?? null) ? array_values($cfg['filas']) : [];
                     $items = [];
                     foreach ($filasDef as $i => $f) {
-                        $imp = isset($value[$i]['imp']) ? (int)$value[$i]['imp'] : 0;
-                        $sat = isset($value[$i]['sat']) ? (int)$value[$i]['sat'] : 0;
-                        if ($imp < 1 || $imp > 5 || $sat < 1 || $sat > 5) continue;
-                        $items[] = ['fila' => $i, 'aspecto' => $f['aspecto'] ?? '', 'importancia' => $imp, 'satisfaccion' => $sat];
+                        $niv = $value[$i]['niv'] ?? '';
+                        if ($niv === 'na') {
+                            $items[] = ['fila' => $i, 'aspecto' => $f['aspecto'] ?? '', 'importancia' => 0, 'no_aplica' => true];
+                            continue;
+                        }
+                        $niv = (int)$niv;
+                        if ($niv < 1 || $niv > 5) continue;
+                        $items[] = ['fila' => $i, 'aspecto' => $f['aspecto'] ?? '', 'importancia' => $niv];
                     }
                     if (empty($items)) continue;
                     $respuesta = json_encode($items, JSON_UNESCAPED_UNICODE);
@@ -377,8 +381,7 @@ class RespuestaControlador {
                 'aspecto'   => $f['aspecto'] ?? '',
                 'necesidad' => $f['necesidad'] ?? '',
                 'dist_imp'  => [1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0],
-                'dist_sat'  => [1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0],
-                'n' => 0, 'prom_imp' => 0, 'prom_sat' => 0,
+                'n' => 0, 'na' => 0, 'prom_imp' => 0,
             ];
         }
         $participantes = 0;
@@ -389,21 +392,18 @@ class RespuestaControlador {
             foreach ($items as $it) {
                 $i = $it['fila'] ?? null;
                 if (!isset($filas[$i])) continue;
+                if (!empty($it['no_aplica'])) { $filas[$i]['na']++; continue; }
                 $imp = (int)($it['importancia'] ?? 0);
-                $sat = (int)($it['satisfaccion'] ?? 0);
-                if ($imp < 1 || $imp > 5 || $sat < 1 || $sat > 5) continue;
+                if ($imp < 1 || $imp > 5) continue;
                 $filas[$i]['dist_imp'][$imp]++;
-                $filas[$i]['dist_sat'][$sat]++;
                 $filas[$i]['n']++;
             }
         }
         foreach ($filas as &$fila) {
             if ($fila['n'] > 0) {
-                $si = 0; $ss = 0;
+                $si = 0;
                 foreach ($fila['dist_imp'] as $v => $c) $si += $v * $c;
-                foreach ($fila['dist_sat'] as $v => $c) $ss += $v * $c;
                 $fila['prom_imp'] = round($si / $fila['n'], 2);
-                $fila['prom_sat'] = round($ss / $fila['n'], 2);
             }
         }
         unset($fila);
