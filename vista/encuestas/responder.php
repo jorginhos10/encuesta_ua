@@ -506,7 +506,7 @@ if(isset($_GET['debug']) && $_GET['debug'] == '1'){
                                                 <td class="mat-asp" style="font-weight:400;font-style:italic;color:#8a8f98;">Cafetería</td>
                                                 <td class="mat-nec" style="background:#fff;">Alimentación a precio justo en el campus.</td>
                                                 <td class="mat-sel">😊 5 Muy importante</td>
-                                                <td class="mat-sel">🫤 3 Cumple parcialmente</td>
+                                                <td class="mat-sel">😊 5 Se cumple totalmente</td>
                                             </tr>
                                         <?php foreach(array_values($matFilas) as $mi => $mf): ?>
                                             <tr>
