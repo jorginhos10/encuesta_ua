@@ -480,8 +480,9 @@ if(isset($_GET['debug']) && $_GET['debug'] == '1'){
                                     $matFilas = is_array($matCfg['filas'] ?? null) ? $matCfg['filas'] : [];
                                     $matColImp = $matCfg['col_importancia'] ?? '¿Qué tan IMPORTANTE es para usted?';
                                     $matColSat = $matCfg['col_satisfaccion'] ?? '¿Qué tanto se CUMPLE esta necesidad?';
+                                    $matCaras   = ['5'=>'😊','4'=>'🙂','3'=>'🫤','2'=>'🙁','1'=>'😞'];
                                     $matEscImp = ['5'=>'Muy importante','4'=>'Importante','3'=>'Moderadamente importante','2'=>'Poco importante','1'=>'Nada importante','na'=>'No aplica'];
-                                    $matEscSat = ['5'=>'😊 Se cumple totalmente','4'=>'🙂 Cumple en gran parte','3'=>'🫤 Cumple parcialmente','2'=>'🙁 Cumple poco','1'=>'😞 No se cumple','na'=>'No aplica'];
+                                    $matEscSat = ['5'=>'Se cumple totalmente','4'=>'Cumple en gran parte','3'=>'Cumple parcialmente','2'=>'Cumple poco','1'=>'No se cumple','na'=>'No aplica'];
                                     $matColN    = $matCfg['col_n'] ?? 'N°';
                                     $matColAsp  = $matCfg['col_aspecto'] ?? 'Aspecto';
                                     $matColNec  = $matCfg['col_necesidad'] ?? 'NECESIDAD';
@@ -504,8 +505,8 @@ if(isset($_GET['debug']) && $_GET['debug'] == '1'){
                                                 <td class="mat-n">Ej.</td>
                                                 <td class="mat-asp" style="font-weight:400;font-style:italic;color:#8a8f98;">Cafetería</td>
                                                 <td class="mat-nec" style="background:#fff;">Alimentación a precio justo en el campus.</td>
-                                                <td class="mat-sel">5 Muy importante</td>
-                                                <td class="mat-sel">3 🫤 Cumple parcialmente</td>
+                                                <td class="mat-sel">😊 5 Muy importante</td>
+                                                <td class="mat-sel">🫤 3 Cumple parcialmente</td>
                                             </tr>
                                         <?php foreach(array_values($matFilas) as $mi => $mf): ?>
                                             <tr>
@@ -515,13 +516,13 @@ if(isset($_GET['debug']) && $_GET['debug'] == '1'){
                                                 <td class="mat-sel" data-label="<?php echo htmlspecialchars($matColImp); ?>">
                                                     <select class="mat-select" name="pregunta_<?php echo $preg['id']; ?>[<?php echo $mi; ?>][imp]" <?php echo $matReq; ?> <?php echo $esCond ? 'disabled' : ''; ?> data-required="<?php echo $preg['requerido']?1:0; ?>">
                                                         <option value="">Seleccione…</option>
-                                                        <?php foreach($matEscImp as $v => $l): ?><option value="<?php echo $v; ?>"><?php echo ($v === 'na' ? '' : $v.' ').$l; ?></option><?php endforeach; ?>
+                                                        <?php foreach($matEscImp as $v => $l): ?><option value="<?php echo $v; ?>"><?php echo ($v === 'na' ? '' : $matCaras[$v].' '.$v.' ').$l; ?></option><?php endforeach; ?>
                                                     </select>
                                                 </td>
                                                 <td class="mat-sel" data-label="<?php echo htmlspecialchars($matColSat); ?>">
                                                     <select class="mat-select" name="pregunta_<?php echo $preg['id']; ?>[<?php echo $mi; ?>][sat]" <?php echo $matReq; ?> <?php echo $esCond ? 'disabled' : ''; ?> data-required="<?php echo $preg['requerido']?1:0; ?>">
                                                         <option value="">Seleccione…</option>
-                                                        <?php foreach($matEscSat as $v => $l): ?><option value="<?php echo $v; ?>"><?php echo ($v === 'na' || mb_strlen($v) > 1 ? '' : $v.' ').$l; ?></option><?php endforeach; ?>
+                                                        <?php foreach($matEscSat as $v => $l): ?><option value="<?php echo $v; ?>"><?php echo ($v === 'na' ? '' : $matCaras[$v].' '.$v.' ').$l; ?></option><?php endforeach; ?>
                                                     </select>
                                                 </td>
                                             </tr>
