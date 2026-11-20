@@ -266,8 +266,8 @@
                 <div class="tb"><div class="tb-title"><i class="fas fa-layer-group"></i> Tarjetas Tinder</div><div style="display:flex;gap:10px;margin-bottom:14px;"><div style="flex:1"><label class="fl" style="font-size:11px;"><i class="fas fa-thumbs-up" style="color:var(--green)"></i> Botón positivo</label><input class="fi" type="text" id="p-label-si" placeholder="Me gusta" style="margin-top:4px;"></div><div style="flex:1"><label class="fl" style="font-size:11px;"><i class="fas fa-thumbs-down" style="color:var(--red)"></i> Botón negativo</label><input class="fi" type="text" id="p-label-no" placeholder="No me gusta" style="margin-top:4px;"></div></div><div id="p-tinder-list"></div><button class="add-tc" onclick="addTinderCard()"><i class="fas fa-plus"></i> Agregar tarjeta</button></div>
             </div>
             <div id="p-mat-box" style="display:none;">
-                <div class="tb"><div class="tb-title"><i class="fas fa-table"></i> Matriz de necesidades</div>
-                    <div style="margin-bottom:14px;"><label class="fl" style="font-size:11px;">Título columna de respuesta (nivel de necesidad)</label><input class="fi" type="text" id="p-mat-ci" placeholder="Nivel de necesidad" style="margin-top:4px;"></div>
+                <div class="tb"><div class="tb-title"><i class="fas fa-table"></i> Matriz Importancia / Satisfacción</div>
+                    <div style="display:flex;gap:10px;margin-bottom:14px;"><div style="flex:1"><label class="fl" style="font-size:11px;">Título columna Importancia</label><input class="fi" type="text" id="p-mat-ci" placeholder="¿Qué tan IMPORTANTE es para usted?" style="margin-top:4px;"></div><div style="flex:1"><label class="fl" style="font-size:11px;">Título columna Cumplimiento</label><input class="fi" type="text" id="p-mat-cs" placeholder="¿Qué tanto se CUMPLE esta necesidad?" style="margin-top:4px;"></div></div>
                     <div id="p-mat-list"></div><button class="add-tc" onclick="addMatFila()"><i class="fas fa-plus"></i> Agregar fila</button></div>
             </div>
             <div id="p-req-box"><label class="cbr"><input type="checkbox" id="p-req" checked><span><i class="fas fa-asterisk" style="color:var(--red);margin-right:5px;"></i> Respuesta requerida</span></label></div>
@@ -308,8 +308,8 @@
                 <div class="tb"><div class="tb-title"><i class="fas fa-layer-group"></i> Tarjetas Tinder</div><div style="display:flex;gap:10px;margin-bottom:14px;"><div style="flex:1"><label class="fl" style="font-size:11px;"><i class="fas fa-thumbs-up" style="color:var(--green)"></i> Botón positivo</label><input class="fi" type="text" id="e-label-si" placeholder="Me gusta" style="margin-top:4px;"></div><div style="flex:1"><label class="fl" style="font-size:11px;"><i class="fas fa-thumbs-down" style="color:var(--red)"></i> Botón negativo</label><input class="fi" type="text" id="e-label-no" placeholder="No me gusta" style="margin-top:4px;"></div></div><div id="e-tinder-list"></div><button class="add-tc" onclick="addTinderCardE()"><i class="fas fa-plus"></i> Agregar tarjeta</button></div>
             </div>
             <div id="e-mat-box" style="display:none;">
-                <div class="tb"><div class="tb-title"><i class="fas fa-table"></i> Matriz de necesidades</div>
-                    <div style="margin-bottom:14px;"><label class="fl" style="font-size:11px;">Título columna de respuesta (nivel de necesidad)</label><input class="fi" type="text" id="e-mat-ci" placeholder="Nivel de necesidad" style="margin-top:4px;"></div>
+                <div class="tb"><div class="tb-title"><i class="fas fa-table"></i> Matriz Importancia / Satisfacción</div>
+                    <div style="display:flex;gap:10px;margin-bottom:14px;"><div style="flex:1"><label class="fl" style="font-size:11px;">Título columna Importancia</label><input class="fi" type="text" id="e-mat-ci" placeholder="¿Qué tan IMPORTANTE es para usted?" style="margin-top:4px;"></div><div style="flex:1"><label class="fl" style="font-size:11px;">Título columna Cumplimiento</label><input class="fi" type="text" id="e-mat-cs" placeholder="¿Qué tanto se CUMPLE esta necesidad?" style="margin-top:4px;"></div></div>
                     <div id="e-mat-list"></div><button class="add-tc" onclick="addMatFilaE()"><i class="fas fa-plus"></i> Agregar fila</button></div>
             </div>
             <div id="e-req-box"><label class="cbr"><input type="checkbox" id="e-req"><span><i class="fas fa-asterisk" style="color:var(--red);margin-right:5px;"></i> Requerida</span></label></div>
@@ -527,7 +527,7 @@ function renderMat(pre){
 function addMatFila(){matC.push({aspecto:'',necesidad:''});renderMat('p');}
 function addMatFilaE(){matE.push({aspecto:'',necesidad:''});renderMat('e');}
 function matOpts(pre){
-    return JSON.stringify({col_importancia:g(pre+'-mat-ci').value.trim()||'Nivel de necesidad',filas:matArr(pre).filter(f=>f.aspecto.trim())});
+    return JSON.stringify({col_importancia:g(pre+'-mat-ci').value.trim()||'¿Qué tan IMPORTANTE es para usted?',col_satisfaccion:g(pre+'-mat-cs').value.trim()||'¿Qué tanto se CUMPLE esta necesidad?',filas:matArr(pre).filter(f=>f.aspecto.trim())});
 }
 
 // Modal Sección
@@ -565,7 +565,7 @@ function guardarOrdenSecciones(){
 
 // Modal Pregunta
 function abrirModalPregunta(eid){
-    optsC=[];tinderC=[];matC=[];g('p-mat-ci').value='';
+    optsC=[];tinderC=[];matC=[];g('p-mat-ci').value='';g('p-mat-cs').value='';
     g('p-enc-id').value=eid;g('p-texto').value='';g('p-tipo').value='texto_corto';
     g('p-req').checked=true;g('p-banco').checked=false;
     g('p-label-si').value='Me gusta';g('p-label-no').value='No me gusta';
@@ -675,9 +675,9 @@ function abrirEditar(id){
         g('e-req').checked=p.requerido==1||p.requerido==='1';
 
         // ── CARGAR OPCIONES / TARJETAS ──
-        optsE=[];tinderE=[];matE=[];g('e-mat-ci').value='';
+        optsE=[];tinderE=[];matE=[];g('e-mat-ci').value='';g('e-mat-cs').value='';
         if(tipoFinal==='matriz'&&p.opciones){
-            try{const m=JSON.parse(p.opciones);matE=Array.isArray(m.filas)?m.filas.map(f=>({aspecto:f.aspecto||'',necesidad:f.necesidad||''})):[];g('e-mat-ci').value=m.col_importancia||'';}catch(e){}
+            try{const m=JSON.parse(p.opciones);matE=Array.isArray(m.filas)?m.filas.map(f=>({aspecto:f.aspecto||'',necesidad:f.necesidad||''})):[];g('e-mat-ci').value=m.col_importancia||'';g('e-mat-cs').value=m.col_satisfaccion||'';}catch(e){}
         }
         if(tipoFinal==='tinder' && p.opciones){
             try{

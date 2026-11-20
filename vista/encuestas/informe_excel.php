@@ -46,7 +46,7 @@
         'seleccion_multiple'=> 'Selección múltiple',
         'tinder'            => 'Card Slider',
         'satisfaccion'      => 'Satisfacción (1-5)',
-        'matriz'            => 'Matriz de necesidades',
+        'matriz'            => 'Matriz importancia/cumplimiento',
         'encabezado'        => 'Encabezado',
         'texto_ordinario'   => 'Informativo',
     ];
@@ -115,8 +115,8 @@
             <td></td>
             <td style="color:#888;font-size:11px;padding-left:20px;">Aspecto <?php echo $mi + 1; ?></td>
             <td><?php echo htmlspecialchars($mf['aspecto']); ?></td>
-            <td style="text-align:center;font-weight:bold;">Necesidad: <?php echo $mf['n'] ? $mf['prom_imp'] : '—'; ?><?php if(!empty($mf['na'])) echo ' (+'.(int)$mf['na'].' No aplica)'; ?></td>
-            <td></td>
+            <td style="text-align:center;font-weight:bold;">Imp: <?php echo $mf['n_imp'] ? $mf['prom_imp'] : '—'; ?><?php if(!empty($mf['na_imp'])) echo ' (+'.(int)$mf['na_imp'].' No aplica)'; ?></td>
+            <td style="text-align:center;font-weight:bold;">Cumpl: <?php echo $mf['n_sat'] ? $mf['prom_sat'] : '—'; ?><?php if(!empty($mf['na_sat'])) echo ' (+'.(int)$mf['na_sat'].' No aplica)'; ?></td>
         </tr>
         <?php endforeach; ?>
 

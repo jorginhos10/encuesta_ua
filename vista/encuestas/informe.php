@@ -289,7 +289,8 @@ if(!isset($_SESSION['user_id'])){ header("Location: " . BASE_URL . "login"); exi
                     <table style="width:100%;border-collapse:collapse;font-size:13px;">
                         <thead><tr style="background:rgba(0,122,255,.08);text-align:left;">
                             <th style="padding:8px 10px;">N°</th><th style="padding:8px 10px;">Aspecto</th>
-                            <th style="padding:8px 10px;text-align:center;">Nivel de necesidad (prom. 1-5)</th>
+                            <th style="padding:8px 10px;text-align:center;">Importancia (prom. 1-5)</th>
+                            <th style="padding:8px 10px;text-align:center;">Cumplimiento (prom. 1-5)</th>
                             <th style="padding:8px 10px;text-align:center;">Respuestas</th>
                         </tr></thead>
                         <tbody>
@@ -297,8 +298,9 @@ if(!isset($_SESSION['user_id'])){ header("Location: " . BASE_URL . "login"); exi
                         <tr style="border-top:1px solid rgba(0,0,0,.08);">
                             <td style="padding:8px 10px;"><?php echo $mi+1; ?></td>
                             <td style="padding:8px 10px;"><strong><?php echo htmlspecialchars($mf['aspecto']); ?></strong><div style="font-size:12px;color:var(--text2);"><?php echo htmlspecialchars($mf['necesidad']); ?></div></td>
-                            <td style="padding:8px 10px;text-align:center;font-weight:700;"><?php echo $mf['n']?$mf['prom_imp']:'—'; ?></td>
-                            <td style="padding:8px 10px;text-align:center;"><?php echo $mf['n']; ?><?php if(!empty($mf['na'])): ?> <span style="font-size:11px;color:var(--text2);">(+<?php echo (int)$mf['na']; ?> No aplica)</span><?php endif; ?></td>
+                            <td style="padding:8px 10px;text-align:center;font-weight:700;"><?php echo $mf['n_imp']?$mf['prom_imp']:'—'; ?><?php if(!empty($mf['na_imp'])): ?> <span style="font-size:11px;font-weight:400;color:var(--text2);">(+<?php echo (int)$mf['na_imp']; ?> No aplica)</span><?php endif; ?></td>
+                            <td style="padding:8px 10px;text-align:center;font-weight:700;"><?php echo $mf['n_sat']?$mf['prom_sat']:'—'; ?><?php if(!empty($mf['na_sat'])): ?> <span style="font-size:11px;font-weight:400;color:var(--text2);">(+<?php echo (int)$mf['na_sat']; ?> No aplica)</span><?php endif; ?></td>
+                            <td style="padding:8px 10px;text-align:center;"><?php echo $mf['n']; ?></td>
                         </tr>
                         <?php endforeach; ?>
                         </tbody>
@@ -447,8 +449,9 @@ if(!isset($_SESSION['user_id'])){ header("Location: " . BASE_URL . "login"); exi
                     $items = json_decode($r, true);
                     if (is_array($items)) {
                         foreach ($items as $it) {
-                            $nivTxt = !empty($it['no_aplica']) ? 'No aplica' : (int)($it['importancia'] ?? 0);
-                            $displayR .= '<div>'.htmlspecialchars($it['aspecto'] ?? '').': Nivel de necesidad <strong>'.$nivTxt.'</strong></div>';
+                            $impTxt = !empty($it['imp_na']) ? 'No aplica' : (!empty($it['imp_vacio']) ? '—' : (int)($it['importancia'] ?? 0));
+                            $satTxt = !empty($it['sat_na']) ? 'No aplica' : (!empty($it['sat_vacio']) ? '—' : (int)($it['satisfaccion'] ?? 0));
+                            $displayR .= '<div>'.htmlspecialchars($it['aspecto'] ?? '').': Importancia <strong>'.$impTxt.'</strong> · Cumplimiento <strong>'.$satTxt.'</strong></div>';
                         }
                     }
                 } elseif ($preg['tipo_pregunta'] === 'satisfaccion') {

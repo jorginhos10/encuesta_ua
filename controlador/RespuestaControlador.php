@@ -262,14 +262,21 @@ class RespuestaControlador {
                     $filasDef = is_array($cfg['filas'] ?? null) ? array_values($cfg['filas']) : [];
                     $items = [];
                     foreach ($filasDef as $i => $f) {
-                        $niv = $value[$i]['niv'] ?? '';
-                        if ($niv === 'na') {
-                            $items[] = ['fila' => $i, 'aspecto' => $f['aspecto'] ?? '', 'importancia' => 0, 'no_aplica' => true];
-                            continue;
-                        }
-                        $niv = (int)$niv;
-                        if ($niv < 1 || $niv > 5) continue;
-                        $items[] = ['fila' => $i, 'aspecto' => $f['aspecto'] ?? '', 'importancia' => $niv];
+                        $impV = $value[$i]['imp'] ?? '';
+                        $satV = $value[$i]['sat'] ?? '';
+                        $impNA = ($impV === 'na');
+                        $satNA = ($satV === 'na');
+                        $imp = $impNA ? 0 : (int)$impV;
+                        $sat = $satNA ? 0 : (int)$satV;
+                        $impOk = $impNA || ($imp >= 1 && $imp <= 5);
+                        $satOk = $satNA || ($sat >= 1 && $sat <= 5);
+                        if (!$impOk && !$satOk) continue;
+                        $item = ['fila' => $i, 'aspecto' => $f['aspecto'] ?? '', 'importancia' => $impOk ? $imp : 0, 'satisfaccion' => $satOk ? $sat : 0];
+                        if ($impNA) $item['imp_na'] = true;
+                        if ($satNA) $item['sat_na'] = true;
+                        if (!$impOk) $item['imp_vacio'] = true;
+                        if (!$satOk) $item['sat_vacio'] = true;
+                        $items[] = $item;
                     }
                     if (empty($items)) continue;
                     $respuesta = json_encode($items, JSON_UNESCAPED_UNICODE);
@@ -381,7 +388,8 @@ class RespuestaControlador {
                 'aspecto'   => $f['aspecto'] ?? '',
                 'necesidad' => $f['necesidad'] ?? '',
                 'dist_imp'  => [1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0],
-                'n' => 0, 'na' => 0, 'prom_imp' => 0,
+                'dist_sat'  => [1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0],
+                'n' => 0, 'n_imp' => 0, 'n_sat' => 0, 'na_imp' => 0, 'na_sat' => 0, 'prom_imp' => 0, 'prom_sat' => 0,
             ];
         }
         $participantes = 0;
@@ -392,19 +400,27 @@ class RespuestaControlador {
             foreach ($items as $it) {
                 $i = $it['fila'] ?? null;
                 if (!isset($filas[$i])) continue;
-                if (!empty($it['no_aplica'])) { $filas[$i]['na']++; continue; }
-                $imp = (int)($it['importancia'] ?? 0);
-                if ($imp < 1 || $imp > 5) continue;
-                $filas[$i]['dist_imp'][$imp]++;
                 $filas[$i]['n']++;
+                if (!empty($it['imp_na'])) {
+                    $filas[$i]['na_imp']++;
+                } else {
+                    $imp = (int)($it['importancia'] ?? 0);
+                    if ($imp >= 1 && $imp <= 5) { $filas[$i]['dist_imp'][$imp]++; $filas[$i]['n_imp']++; }
+                }
+                if (!empty($it['sat_na'])) {
+                    $filas[$i]['na_sat']++;
+                } else {
+                    $sat = (int)($it['satisfaccion'] ?? 0);
+                    if ($sat >= 1 && $sat <= 5) { $filas[$i]['dist_sat'][$sat]++; $filas[$i]['n_sat']++; }
+                }
             }
         }
         foreach ($filas as &$fila) {
-            if ($fila['n'] > 0) {
-                $si = 0;
-                foreach ($fila['dist_imp'] as $v => $c) $si += $v * $c;
-                $fila['prom_imp'] = round($si / $fila['n'], 2);
-            }
+            $si = 0; $ss = 0;
+            foreach ($fila['dist_imp'] as $v => $c) $si += $v * $c;
+            foreach ($fila['dist_sat'] as $v => $c) $ss += $v * $c;
+            if ($fila['n_imp'] > 0) $fila['prom_imp'] = round($si / $fila['n_imp'], 2);
+            if ($fila['n_sat'] > 0) $fila['prom_sat'] = round($ss / $fila['n_sat'], 2);
         }
         unset($fila);
         return [
