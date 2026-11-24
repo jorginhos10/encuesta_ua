@@ -34,11 +34,9 @@ class RespuestaControlador {
             exit();
         }
 
-        // Modo prueba (?test=yes): solo para el dueño de la encuesta con sesión iniciada.
-        // Muestra las preguntas sin pedir acceso ni exigir que esté activa, y no permite enviar.
-        $modoPrueba = (($_GET['test'] ?? '') === 'yes')
-            && isset($_SESSION['user_id'])
-            && $_SESSION['user_id'] == $encuesta['usuario_id'];
+        // Modo prueba (?test=yes): muestra las preguntas sin pedir acceso (contraseña/correo)
+        // ni exigir que esté activa, y no permite enviar respuestas.
+        $modoPrueba = (($_GET['test'] ?? '') === 'yes');
 
         if ($encuesta['estado'] != 'activa' && !$modoPrueba) {
             echo "<h2>Esta encuesta no está disponible</h2>";
