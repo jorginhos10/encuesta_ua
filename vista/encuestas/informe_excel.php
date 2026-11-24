@@ -43,6 +43,7 @@
         'texto_corto'       => 'Texto corto',
         'texto_largo'       => 'Texto largo',
         'seleccion_unica'   => 'Selección única',
+        'lista_desplegable' => 'Lista desplegable',
         'seleccion_multiple'=> 'Selección múltiple',
         'tinder'            => 'Card Slider',
         'satisfaccion'      => 'Satisfacción (1-5)',
@@ -99,7 +100,7 @@
         </tr>
         <?php endforeach; ?>
 
-    <?php elseif (in_array($tipo, ['seleccion_unica', 'seleccion_multiple']) && !empty($stats)): ?>
+    <?php elseif (in_array($tipo, ['seleccion_unica', 'lista_desplegable', 'seleccion_multiple']) && !empty($stats)): ?>
         <?php foreach ($stats as $opt): ?>
         <tr>
             <td></td>

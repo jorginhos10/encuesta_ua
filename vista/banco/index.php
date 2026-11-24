@@ -129,7 +129,7 @@
 const encuesta_id = <?php echo isset($_GET['encuesta_id']) ? intval($_GET['encuesta_id']) : 'null'; ?>;
 let todasPreguntas = [];
 
-const tipoLabel = {texto_corto:'Texto corto',texto_largo:'Texto largo',seleccion_unica:'Única',seleccion_multiple:'Múltiple',checkbox:'Casilla',tinder:'Card Slider',matriz:'Matriz',matriz_dinamica:'Matriz dinámica'};
+const tipoLabel = {texto_corto:'Texto corto',texto_largo:'Texto largo',seleccion_unica:'Única',lista_desplegable:'Lista desplegable',seleccion_multiple:'Múltiple',checkbox:'Casilla',tinder:'Card Slider',matriz:'Matriz',matriz_dinamica:'Matriz dinámica'};
 
 // Cargar secciones disponibles de la encuesta actual
 function cargarSecciones() {

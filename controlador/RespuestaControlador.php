@@ -613,7 +613,7 @@ class RespuestaControlador {
                 } else {
                     $datos = $this->respuestaModelo->getEstadisticasByPregunta($encuesta_id, $preg['id']);
                     // Rellenar opciones con 0 votos que no recibieron respuestas
-                    if (in_array($preg['tipo_pregunta'], ['seleccion_unica', 'seleccion_multiple']) && !empty($preg['opciones'])) {
+                    if (in_array($preg['tipo_pregunta'], ['seleccion_unica', 'seleccion_multiple', 'lista_desplegable']) && !empty($preg['opciones'])) {
                         $opcionesDef = json_decode($preg['opciones'], true);
                         if (is_array($opcionesDef)) {
                             $counts = [];

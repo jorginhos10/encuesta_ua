@@ -51,7 +51,23 @@ if (!class_exists('PreguntaModelo')) {
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
 
+        /** tipo_pregunta era ENUM; se amplía a VARCHAR(30) para admitir tipos nuevos (matriz, lista_desplegable...). */
+        private static function asegurarColumnaTipo($conn, $tabla) {
+            static $hecho = [];
+            if (isset($hecho[$tabla])) return;
+            $hecho[$tabla] = true;
+            try {
+                $col = $conn->query("SHOW COLUMNS FROM `$tabla` LIKE 'tipo_pregunta'")->fetch(PDO::FETCH_ASSOC);
+                if ($col && stripos($col['Type'], 'enum') === 0) {
+                    $conn->exec("ALTER TABLE `$tabla` MODIFY `tipo_pregunta` VARCHAR(30) NOT NULL DEFAULT 'texto_corto'");
+                }
+            } catch (PDOException $e) {
+                error_log("No se pudo ampliar tipo_pregunta: " . $e->getMessage());
+            }
+        }
+
         public function createPregunta($encabezado_id, $pregunta, $tipo_pregunta, $opciones, $requerido, $guardar_banco, $orden, $pregunta_padre_id = null, $condicion_operador = null, $condicion_valor = null) {
+            self::asegurarColumnaTipo($this->conn, 'preguntas');
             try {
                 $query = "INSERT INTO preguntas 
                           (encabezado_id, pregunta, tipo_pregunta, opciones, requerido, guardar_banco, orden, pregunta_padre_id, condicion_operador, condicion_valor) 
@@ -77,6 +93,7 @@ if (!class_exists('PreguntaModelo')) {
         }
 
         public function updatePregunta($id, $pregunta, $tipo_pregunta, $opciones, $requerido, $pregunta_padre_id = null, $condicion_operador = null, $condicion_valor = null) {
+            self::asegurarColumnaTipo($this->conn, 'preguntas');
             try {
                 $query = "UPDATE preguntas 
                           SET pregunta = :pregunta, tipo_pregunta = :tipo_pregunta, opciones = :opciones, 
@@ -128,7 +145,7 @@ if (!class_exists('PreguntaModelo')) {
         }
         
         public function getPreguntasDisponiblesParaCondicion($encabezado_id, $pregunta_actual_id = null) {
-            $query = "SELECT * FROM preguntas WHERE encabezado_id = :encabezado_id AND tipo_pregunta IN ('seleccion_unica', 'seleccion_multiple')";
+            $query = "SELECT * FROM preguntas WHERE encabezado_id = :encabezado_id AND tipo_pregunta IN ('seleccion_unica', 'seleccion_multiple', 'lista_desplegable')";
             if($pregunta_actual_id) {
                 $query .= " AND id != :pregunta_actual_id";
             }

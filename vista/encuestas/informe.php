@@ -198,7 +198,7 @@ if(!isset($_SESSION['user_id'])){ header("Location: " . BASE_URL . "login"); exi
             $isTexto=in_array($preg['tipo_pregunta'],['texto_corto','texto_largo']);
             $isTinder=$preg['tipo_pregunta']==='tinder';
             $isCheckbox=$preg['tipo_pregunta']==='checkbox';
-            $tl=['texto_corto'=>'Texto corto','texto_largo'=>'Texto largo','seleccion_unica'=>'Selección única','seleccion_multiple'=>'Selección múltiple','checkbox'=>'Casilla','tinder'=>'Card Slider','satisfaccion'=>'Satisfacción','matriz'=>'Matriz importancia/satisfacción','matriz_dinamica'=>'Matriz dinámica','encabezado'=>'Encabezado','texto_ordinario'=>'Informativo'][$preg['tipo_pregunta']]??$preg['tipo_pregunta'];
+            $tl=['texto_corto'=>'Texto corto','texto_largo'=>'Texto largo','seleccion_unica'=>'Selección única','lista_desplegable'=>'Lista desplegable','seleccion_multiple'=>'Selección múltiple','checkbox'=>'Casilla','tinder'=>'Card Slider','satisfaccion'=>'Satisfacción','matriz'=>'Matriz importancia/satisfacción','matriz_dinamica'=>'Matriz dinámica','encabezado'=>'Encabezado','texto_ordinario'=>'Informativo'][$preg['tipo_pregunta']]??$preg['tipo_pregunta'];
         ?>
         <div class="qcard">
             <div class="qch">

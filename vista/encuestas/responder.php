@@ -330,7 +330,7 @@ if(isset($_GET['debug']) && $_GET['debug'] == '1'){
                         // ── DETECCIÓN INTELIGENTE POR CONTENIDO ──
                         // Si el tipo está vacío o desconocido pero hay opciones JSON,
                         // intentamos inferir el tipo a partir del contenido.
-                        $tiposConocidos = ['texto_corto','texto_largo','seleccion_unica','seleccion_multiple','checkbox','tinder','satisfaccion','matriz','matriz_dinamica','encabezado','texto_ordinario'];
+                        $tiposConocidos = ['texto_corto','texto_largo','seleccion_unica','lista_desplegable','seleccion_multiple','checkbox','tinder','satisfaccion','matriz','matriz_dinamica','encabezado','texto_ordinario'];
                         if(!in_array($preg['tipo_pregunta'], $tiposConocidos) && !empty($preg['opciones'])){
                             $testOpciones = json_decode($preg['opciones'], true);
                             // Soporte para doble-codificación JSON
@@ -473,6 +473,16 @@ if(isset($_GET['debug']) && $_GET['debug'] == '1'){
                                     <input class="q-input" type="text" name="pregunta_<?php echo $preg['id']; ?>" <?php echo (!$esCond && $preg['requerido']) ? 'required' : ''; ?> <?php echo $esCond ? 'disabled' : ''; ?> data-required="<?php echo $preg['requerido']?1:0; ?>" placeholder="Escribe tu respuesta...">
                                 <?php elseif($preg['tipo_pregunta'] === 'texto_largo'): ?>
                                     <textarea class="q-textarea" name="pregunta_<?php echo $preg['id']; ?>" <?php echo (!$esCond && $preg['requerido']) ? 'required' : ''; ?> <?php echo $esCond ? 'disabled' : ''; ?> data-required="<?php echo $preg['requerido']?1:0; ?>" placeholder="Escribe tu respuesta detallada..."></textarea>
+                                <?php elseif($preg['tipo_pregunta'] === 'lista_desplegable'):
+                                    $opciones = json_decode($preg['opciones'] ?? '[]', true);
+                                    if(!is_array($opciones)) $opciones = [];
+                                ?>
+                                    <select class="q-input q-select" name="pregunta_<?php echo $preg['id']; ?>" <?php echo (!$esCond && $preg['requerido']) ? 'required' : ''; ?> <?php echo $esCond ? 'disabled' : ''; ?> data-required="<?php echo $preg['requerido']?1:0; ?>">
+                                        <option value="">Seleccione…</option>
+                                        <?php foreach($opciones as $op): ?>
+                                        <option value="<?php echo htmlspecialchars($op); ?>"><?php echo htmlspecialchars($op); ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
                                 <?php elseif($preg['tipo_pregunta'] === 'seleccion_unica'): 
                                     $opciones = json_decode($preg['opciones'] ?? '[]', true);
                                     if(!is_array($opciones)) $opciones = [];
@@ -696,6 +706,8 @@ function actualizarCondicionales() {
         if (checks.length) valorPadre = Array.from(checks).map(c => c.value).join(', ');
         const textInput = document.querySelector(`input[name="pregunta_${padreId}"][type="text"], textarea[name="pregunta_${padreId}"]`);
         if (textInput && textInput.value.trim()) valorPadre = textInput.value.trim();
+        const selInput = document.querySelector(`select[name="pregunta_${padreId}"]`);
+        if (selInput && selInput.value !== '') valorPadre = selInput.value;
 
         let mostrar = false;
         switch (operador) {
@@ -747,6 +759,7 @@ function actualizarCondicionales() {
             }
         }
     });
+    refrescarNavSiCambio();
     actualizarProgreso();
 }
 
@@ -1026,14 +1039,23 @@ function actualizarProgreso() {
         const sats = Array.from(row.querySelectorAll('input[data-satisfaccion]')).filter(i => i.value !== '');
         const mats = Array.from(row.querySelectorAll('select.mat-select'));
         mats.forEach(s => s.classList.toggle('mat-filled', s.value !== ''));
-        const dmB = row.querySelector('.dm'); const matOk = dmB ? dmB.classList.contains('dm-complete') : (mats.length > 0 && mats.every(s => s.value !== ''));
-        if (radios.length || checks.length || texts.length || sats.length || matOk) respondidas++;
+        const selOk = !!row.querySelector('select.q-select') && row.querySelector('select.q-select').value !== ''; const dmB = row.querySelector('.dm'); const matOk = dmB ? dmB.classList.contains('dm-complete') : (mats.length > 0 && mats.every(s => s.value !== ''));
+        if (radios.length || checks.length || texts.length || sats.length || matOk || selOk) respondidas++;
     });
     const pct = total > 0 ? Math.round((respondidas / total) * 100) : 0;
     document.getElementById('prog-fill').style.width = pct + '%';
     document.getElementById('bar-fill').style.width = pct + '%';
     document.getElementById('pct-lbl').textContent = pct + '%';
     actualizarNav();
+}
+
+// Reconstruye la navegación solo cuando cambian las preguntas visibles (condicionales)
+let _navSig = null;
+function refrescarNavSiCambio() {
+    const sig = Array.from(document.querySelectorAll('.q-row:not(.oculta)')).map(r => r.id).join('|');
+    if (sig === _navSig) return;
+    _navSig = sig;
+    construirNav();
 }
 
 function construirNav() {
@@ -1044,6 +1066,7 @@ function construirNav() {
         let idx = 1;
         const isMobile = listId === 'mobile-nav-list';
         document.querySelectorAll('.q-row').forEach(row => {
+            if (row.classList.contains('oculta')) return; // condicionales ocultas no aparecen en la navegación
             if (row.querySelector('.q-head, .q-info')) return;
             const label = row.querySelector('.q-label, .tinder-q-label');
             if (!label) return;
@@ -1080,8 +1103,8 @@ function actualizarNav() {
                 const texts = Array.from(row.querySelectorAll('input[type="text"], textarea')).filter(i => i.value.trim() !== '');
                 const sats = Array.from(row.querySelectorAll('input[data-satisfaccion]')).filter(i => i.value !== '');
                 const mats = Array.from(row.querySelectorAll('select.mat-select'));
-                const dmB = row.querySelector('.dm'); const matOk = dmB ? dmB.classList.contains('dm-complete') : (mats.length > 0 && mats.every(s => s.value !== ''));
-                respondida = checks.length > 0 || texts.length > 0 || sats.length > 0 || matOk;
+                const selOk = !!row.querySelector('select.q-select') && row.querySelector('select.q-select').value !== ''; const dmB = row.querySelector('.dm'); const matOk = dmB ? dmB.classList.contains('dm-complete') : (mats.length > 0 && mats.every(s => s.value !== ''));
+                respondida = checks.length > 0 || texts.length > 0 || sats.length > 0 || matOk || selOk;
             }
             if (respondida) navItem.classList.add('nav-answered');
             else navItem.classList.remove('nav-answered');

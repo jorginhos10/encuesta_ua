@@ -6,7 +6,23 @@ class BancoPreguntasModelo {
         $this->conn = $db;
     }
 
+    /** tipo_pregunta era ENUM; se amplía a VARCHAR(30) para admitir tipos nuevos (matriz, lista_desplegable...). */
+    private static function asegurarColumnaTipo($conn, $tabla) {
+        static $hecho = [];
+        if (isset($hecho[$tabla])) return;
+        $hecho[$tabla] = true;
+        try {
+            $col = $conn->query("SHOW COLUMNS FROM `$tabla` LIKE 'tipo_pregunta'")->fetch(PDO::FETCH_ASSOC);
+            if ($col && stripos($col['Type'], 'enum') === 0) {
+                $conn->exec("ALTER TABLE `$tabla` MODIFY `tipo_pregunta` VARCHAR(30) NOT NULL DEFAULT 'texto_corto'");
+            }
+        } catch (PDOException $e) {
+            error_log("No se pudo ampliar tipo_pregunta: " . $e->getMessage());
+        }
+    }
+
     public function guardarPregunta($usuario_id, $pregunta, $tipo_pregunta, $opciones, $categoria = null) {
+        self::asegurarColumnaTipo($this->conn, 'banco_preguntas');
         $query = "INSERT INTO banco_preguntas 
                   (usuario_id, pregunta, tipo_pregunta, opciones, categoría) 
                   VALUES (:usuario_id, :pregunta, :tipo_pregunta, :opciones, :categoria)";

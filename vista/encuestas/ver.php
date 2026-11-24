@@ -247,7 +247,7 @@
                 <select class="fs" id="p-tipo" onchange="onTipoChange()">
                     <option value="texto_corto">📝 Texto Corto</option>
                     <option value="texto_largo">📄 Texto Largo</option>
-                    <option value="seleccion_unica">🔘 Selección Única</option>
+                    <option value="seleccion_unica">🔘 Selección Única</option><option value="lista_desplegable">🔽 Lista desplegable</option>
                     <option value="seleccion_multiple">☑️ Selección Múltiple</option>
                     <option value="checkbox">✅ Casilla de verificación</option>
                     <option value="tinder">🃏 Card Slider (tarjetas deslizables)</option>
@@ -296,7 +296,7 @@
             <div class="fg"><label class="fl"><i class="fas fa-question-circle"></i> Contenido</label><div class="txt-toolbar"><button type="button" class="txt-tool" onclick="insertarEnlace('e-texto')" title="Insertar hipervínculo"><i class="fas fa-link"></i> Enlace</button></div><textarea class="ft" id="e-texto" rows="3"></textarea></div>
             <div class="fg"><label class="fl"><i class="fas fa-sliders-h"></i> Tipo</label>
                 <select class="fs" id="e-tipo" onchange="onTipoChangeE()">
-                    <option value="texto_corto">📝 Texto Corto</option><option value="texto_largo">📄 Texto Largo</option><option value="seleccion_unica">🔘 Selección Única</option><option value="seleccion_multiple">☑️ Selección Múltiple</option><option value="checkbox">✅ Casilla de verificación</option><option value="tinder">🃏 Card Slider</option><option value="satisfaccion">😊 Satisfacción (1-5)</option><option value="matriz">📊 Matriz Importancia / Satisfacción</option><option value="matriz_dinamica">🎞️ Matriz dinámica (una a una)</option><option value="encabezado">📌 Encabezado</option><option value="texto_ordinario">📝 Texto Informativo</option>
+                    <option value="texto_corto">📝 Texto Corto</option><option value="texto_largo">📄 Texto Largo</option><option value="seleccion_unica">🔘 Selección Única</option><option value="lista_desplegable">🔽 Lista desplegable</option><option value="seleccion_multiple">☑️ Selección Múltiple</option><option value="checkbox">✅ Casilla de verificación</option><option value="tinder">🃏 Card Slider</option><option value="satisfaccion">😊 Satisfacción (1-5)</option><option value="matriz">📊 Matriz Importancia / Satisfacción</option><option value="matriz_dinamica">🎞️ Matriz dinámica (una a una)</option><option value="encabezado">📌 Encabezado</option><option value="texto_ordinario">📝 Texto Informativo</option>
                 </select>
             </div>
             <div id="e-opts-box" style="display:none;">
@@ -392,7 +392,7 @@ function renderSecciones(secciones){
     if(sortableSecciones) sortableSecciones.destroy();
     sortableSecciones=new Sortable(c,{animation:200,handle:'.sec-drag-handle',ghostClass:'dragging',onEnd:guardarOrdenSecciones});
 }
-const TIPO_MAP={texto_corto:'Texto corto',texto_largo:'Texto largo',seleccion_unica:'Única',seleccion_multiple:'Múltiple',checkbox:'Casilla',tinder:'Card Slider',satisfaccion:'Satisfacción',matriz:'Matriz',matriz_dinamica:'Matriz dinámica',encabezado:'Encabezado',texto_ordinario:'Texto info'};
+const TIPO_MAP={texto_corto:'Texto corto',texto_largo:'Texto largo',seleccion_unica:'Única',lista_desplegable:'Lista desplegable',seleccion_multiple:'Múltiple',checkbox:'Casilla',tinder:'Card Slider',satisfaccion:'Satisfacción',matriz:'Matriz',matriz_dinamica:'Matriz dinámica',encabezado:'Encabezado',texto_ordinario:'Texto info'};
 function renderPreguntas(sid,preguntas){
     const c=g(`q-list-${sid}`);if(!c) return;c.innerHTML='';
     if(!preguntas.length){c.innerHTML='<div class="empty-section"><i class="fas fa-inbox" style="margin-right:5px;"></i>Sin elementos</div>';return;}
@@ -404,7 +404,7 @@ function renderPreguntas(sid,preguntas){
         if(p.pregunta_padre_id>0) tags+='<span class="tag tag-cond"><i class="fas fa-code-branch"></i> Cond.</span>';
         let extra='';
         if(p.tipo_pregunta==='tinder'&&p.opciones){try{const cs=JSON.parse(p.opciones);if(cs.length) extra=`<div class="tinder-preview">${cs.slice(0,4).map(c=>`<div class="tinder-mini">🃏 ${escHtml((c.titulo||'').substring(0,16))}</div>`).join('')}${cs.length>4?`<div class="tinder-mini">+${cs.length-4}</div>`:''}</div>`;}catch(e){}}
-        if((p.tipo_pregunta==='seleccion_unica'||p.tipo_pregunta==='seleccion_multiple')&&p.opciones){try{const ops=JSON.parse(p.opciones);if(ops.length) extra=`<div class="question-sub">${ops.map(o=>'· '+escHtml(o)).join('  ')}</div>`;}catch(e){}}
+        if((p.tipo_pregunta==='seleccion_unica'||p.tipo_pregunta==='lista_desplegable'||p.tipo_pregunta==='seleccion_multiple')&&p.opciones){try{const ops=JSON.parse(p.opciones);if(ops.length) extra=`<div class="question-sub">${ops.map(o=>'· '+escHtml(o)).join('  ')}</div>`;}catch(e){}}
         if(p.tipo_pregunta==='checkbox') extra=`<div class="question-sub"><span style="display:inline-flex;align-items:center;gap:6px;"><input type="checkbox" disabled> <span style="font-size:12px;color:var(--text2);">${escHtml(p.pregunta.substring(0,50))}</span></span></div>`;
         const cond=p.pregunta_padre_id>0?`<div class="cond-detail"><i class="fas fa-arrow-right"></i> Si ${escHtml(p.condicion_operador||'')} "${escHtml(p.condicion_valor||'')}"</div>`:'';
         div.innerHTML=`<i class="fas fa-grip-vertical drag-handle"></i><div class="question-content"><div class="question-text">${escHtml(stripTags(p.pregunta))}</div><div class="question-meta">${tags}</div>${extra}${cond}</div><div class="question-actions"><button class="action-btn edit" onclick="abrirEditar(${p.id})"><i class="fas fa-pen"></i></button><button class="action-btn del" onclick="eliminarP(${p.id})"><i class="fas fa-trash"></i></button></div>`;
@@ -575,7 +575,7 @@ function abrirModalPregunta(eid){
     abrir('mPregunta');onTipoChange();
 }
 function onTipoChange(){
-    const t=g('p-tipo').value,isOpt=t==='seleccion_unica'||t==='seleccion_multiple',isTinder=t==='tinder',isStatic=t==='encabezado'||t==='texto_ordinario';
+    const t=g('p-tipo').value,isOpt=t==='seleccion_unica'||t==='lista_desplegable'||t==='seleccion_multiple',isTinder=t==='tinder',isStatic=t==='encabezado'||t==='texto_ordinario';
     g('p-opts-box').style.display=isOpt?'block':'none';
     g('p-tinder-box').style.display=isTinder?'block':'none';
     g('p-mat-box').style.display=(t==='matriz'||t==='matriz_dinamica')?'block':'none';
@@ -609,13 +609,13 @@ function renderOpts(listId,arr,arrName){
 function guardarPregunta(){
     const pregunta=g('p-texto').value.trim(),tipo=g('p-tipo').value;
     if(!pregunta){toast('Contenido requerido','error');return;}
-    if((tipo==='seleccion_unica'||tipo==='seleccion_multiple')&&optsC.length<2){toast('Min. 2 opciones','error');return;}
+    if((tipo==='seleccion_unica'||tipo==='lista_desplegable'||tipo==='seleccion_multiple')&&optsC.length<2){toast('Min. 2 opciones','error');return;}
     if(tipo==='tinder'&&tinderC.length<1){toast('Agrega al menos 1 tarjeta','error');return;}
     if(tipo==='tinder'&&tinderC.some(c=>!c.titulo.trim())){toast('Todas las tarjetas necesitan título','error');return;}
     if((tipo==='matriz'||tipo==='matriz_dinamica')&&!matC.some(f=>f.aspecto.trim())){toast('Agrega al menos 1 fila con aspecto','error');return;}
     let opts='null';
     if(tipo==='matriz'||tipo==='matriz_dinamica') opts=matOpts('p');
-    if(tipo==='seleccion_unica'||tipo==='seleccion_multiple') opts=JSON.stringify(optsC);
+    if(tipo==='seleccion_unica'||tipo==='lista_desplegable'||tipo==='seleccion_multiple') opts=JSON.stringify(optsC);
     if(tipo==='tinder') opts=JSON.stringify({label_si:g('p-label-si').value.trim()||'Me gusta',label_no:g('p-label-no').value.trim()||'No me gusta',tarjetas:tinderC});
     const fd=new URLSearchParams();
     fd.append('encabezado_id',g('p-enc-id').value);fd.append('pregunta',pregunta);fd.append('tipo_pregunta',tipo);fd.append('opciones',opts);
@@ -633,7 +633,7 @@ function abrirEditar(id){
 
         // ── NORMALIZAR TIPO ──
         // El tipo puede venir con espacios, mayúsculas o vacío. Intentamos hacerlo coincidir.
-        const tiposValidos=['texto_corto','texto_largo','seleccion_unica','seleccion_multiple','checkbox','tinder','satisfaccion','matriz','matriz_dinamica','encabezado','texto_ordinario'];
+        const tiposValidos=['texto_corto','texto_largo','seleccion_unica','lista_desplegable','seleccion_multiple','checkbox','tinder','satisfaccion','matriz','matriz_dinamica','encabezado','texto_ordinario'];
         let tipoRaw=(p.tipo_pregunta||'').toString().trim().toLowerCase();
         let tipoFinal=tiposValidos.indexOf(tipoRaw)>=0 ? tipoRaw : null;
 
@@ -700,7 +700,7 @@ function abrirEditar(id){
                 }
             }catch(e){console.error('Error parseando opciones tinder:',e);}
         }
-        if((tipoFinal==='seleccion_unica'||tipoFinal==='seleccion_multiple') && p.opciones){
+        if((tipoFinal==='seleccion_unica'||tipoFinal==='lista_desplegable'||tipoFinal==='seleccion_multiple') && p.opciones){
             try{
                 const parsed=JSON.parse(p.opciones);
                 if(Array.isArray(parsed)) optsE=parsed;
@@ -736,7 +736,7 @@ function abrirEditar(id){
     }).catch(err=>{console.error('Error al abrir editar:',err);toast('Error al cargar','error');});
 }
 function onTipoChangeE(){
-    const t=g('e-tipo').value,isOpt=t==='seleccion_unica'||t==='seleccion_multiple',isTinder=t==='tinder',isStatic=t==='encabezado'||t==='texto_ordinario';
+    const t=g('e-tipo').value,isOpt=t==='seleccion_unica'||t==='lista_desplegable'||t==='seleccion_multiple',isTinder=t==='tinder',isStatic=t==='encabezado'||t==='texto_ordinario';
     g('e-opts-box').style.display=isOpt?'block':'none';
     g('e-tinder-box').style.display=isTinder?'block':'none';
     g('e-mat-box').style.display=(t==='matriz'||t==='matriz_dinamica')?'block':'none';
@@ -747,12 +747,12 @@ function addOptE(){const v=g('e-nueva-opt').value.trim();if(!v){toast('Escribe u
 function actualizarPregunta(){
     const id=g('e-id').value,pregunta=g('e-texto').value.trim(),tipo=g('e-tipo').value;
     if(!pregunta){toast('Contenido requerido','error');return;}
-    if((tipo==='seleccion_unica'||tipo==='seleccion_multiple')&&optsE.length<2){toast('Min. 2 opciones','error');return;}
+    if((tipo==='seleccion_unica'||tipo==='lista_desplegable'||tipo==='seleccion_multiple')&&optsE.length<2){toast('Min. 2 opciones','error');return;}
     if(tipo==='tinder'&&tinderE.length<1){toast('Agrega al menos 1 tarjeta','error');return;}
     if((tipo==='matriz'||tipo==='matriz_dinamica')&&!matE.some(f=>f.aspecto.trim())){toast('Agrega al menos 1 fila con aspecto','error');return;}
     let opts='null';
     if(tipo==='matriz'||tipo==='matriz_dinamica') opts=matOpts('e');
-    if(tipo==='seleccion_unica'||tipo==='seleccion_multiple') opts=JSON.stringify(optsE);
+    if(tipo==='seleccion_unica'||tipo==='lista_desplegable'||tipo==='seleccion_multiple') opts=JSON.stringify(optsE);
     if(tipo==='tinder') opts=JSON.stringify({label_si:g('e-label-si').value.trim()||'Me gusta',label_no:g('e-label-no').value.trim()||'No me gusta',tarjetas:tinderE});
     const fd=new URLSearchParams();fd.append('id',id);fd.append('pregunta',pregunta);fd.append('tipo_pregunta',tipo);fd.append('opciones',opts);fd.append('requerido',g('e-req').checked?1:0);fd.append('pregunta_padre_id',g('e-padre').value||'');fd.append('condicion_operador',g('e-op').value);fd.append('condicion_valor',g('e-val').value);
     fetch('index.php?action=banco&subaction=actualizar_pregunta',{method:'POST',body:fd}).then(r=>r.json()).then(d=>{if(d.success){toast('Actualizado','success');cerrar('mEditar');cargarEncuesta();}else toast('Error','error');});

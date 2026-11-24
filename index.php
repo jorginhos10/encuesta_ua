@@ -169,7 +169,7 @@ switch($action) {
                 $excluir = isset($_GET['excluir']) ? intval($_GET['excluir']) : 0;
                 $query = "SELECT id, pregunta, tipo_pregunta, opciones FROM preguntas
                           WHERE encabezado_id = :encabezado_id
-                          AND tipo_pregunta IN ('seleccion_unica', 'seleccion_multiple')";
+                          AND tipo_pregunta IN ('seleccion_unica', 'seleccion_multiple', 'lista_desplegable')";
                 if($excluir) {
                     $query .= " AND id != :excluir";
                 }
@@ -240,7 +240,7 @@ switch($action) {
                 $encabezado_id = isset($_POST['encabezado_id']) ? intval($_POST['encabezado_id']) : 0;
                 $pregunta = isset($_POST['pregunta']) ? $_POST['pregunta'] : '';
                 $tipo_pregunta = isset($_POST['tipo_pregunta']) ? trim($_POST['tipo_pregunta']) : 'texto_corto';
-                $tiposPermitidos = ['texto_corto','texto_largo','seleccion_unica','seleccion_multiple','checkbox','tinder','satisfaccion','matriz','matriz_dinamica','encabezado','texto_ordinario'];
+                $tiposPermitidos = ['texto_corto','texto_largo','seleccion_unica','lista_desplegable','seleccion_multiple','checkbox','tinder','satisfaccion','matriz','matriz_dinamica','encabezado','texto_ordinario'];
                 if(!in_array($tipo_pregunta, $tiposPermitidos)) $tipo_pregunta = 'texto_corto';
                 $opciones = isset($_POST['opciones']) && $_POST['opciones'] !== 'null' ? $_POST['opciones'] : null;
                 $requerido = (isset($_POST['requerido']) && $_POST['requerido'] == '1') ? 1 : 0;
@@ -323,7 +323,7 @@ switch($action) {
                 $id = isset($_POST['id']) ? intval($_POST['id']) : 0;
                 $pregunta = isset($_POST['pregunta']) ? $_POST['pregunta'] : '';
                 $tipo_pregunta = isset($_POST['tipo_pregunta']) ? trim($_POST['tipo_pregunta']) : 'texto_corto';
-                $tiposPermitidos = ['texto_corto','texto_largo','seleccion_unica','seleccion_multiple','checkbox','tinder','satisfaccion','matriz','matriz_dinamica','encabezado','texto_ordinario'];
+                $tiposPermitidos = ['texto_corto','texto_largo','seleccion_unica','lista_desplegable','seleccion_multiple','checkbox','tinder','satisfaccion','matriz','matriz_dinamica','encabezado','texto_ordinario'];
                 if(!in_array($tipo_pregunta, $tiposPermitidos)) $tipo_pregunta = 'texto_corto';
                 $opciones = isset($_POST['opciones']) && $_POST['opciones'] !== 'null' ? $_POST['opciones'] : null;
                 $requerido = (isset($_POST['requerido']) && $_POST['requerido'] == '1') ? 1 : 0;
