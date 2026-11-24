@@ -24,7 +24,20 @@ class EncuestaModelo {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
+    /** La columna era ENUM con 4 valores; se amplía a VARCHAR(30) para admitir 'correos_especificos'. */
+    private function asegurarColumnaSeguridad() {
+        try {
+            $col = $this->conn->query("SHOW COLUMNS FROM " . $this->table_name . " LIKE 'tipo_seguridad'")->fetch(PDO::FETCH_ASSOC);
+            if ($col && stripos($col['Type'], 'enum') === 0) {
+                $this->conn->exec("ALTER TABLE " . $this->table_name . " MODIFY `tipo_seguridad` VARCHAR(30) NOT NULL DEFAULT 'publica'");
+            }
+        } catch (PDOException $e) {
+            error_log("No se pudo ampliar tipo_seguridad: " . $e->getMessage());
+        }
+    }
+
     public function create($nombre, $fecha_inicio, $fecha_cierre, $usuario_id, $tipo_seguridad = 'publica', $password = null) {
+        if ($tipo_seguridad === 'correos_especificos') $this->asegurarColumnaSeguridad();
         // Si es password, hashearla
         $hashedPassword = null;
         if ($tipo_seguridad === 'password' && !empty($password)) {
@@ -47,6 +60,7 @@ class EncuestaModelo {
     }
 
     public function update($id, $nombre, $fecha_inicio, $fecha_cierre, $tipo_seguridad = 'publica', $password = null, $cambiarPassword = false, $banner_url = '', $banner_modo = 'enunciado', $background_url = '', $opacidad_formulario = 100, $opacidad_banner = 100, $opacidad_sidebar = 100) {
+        if ($tipo_seguridad === 'correos_especificos') $this->asegurarColumnaSeguridad();
         $camposComunes = "nombre = :nombre, fecha_inicio = :fecha_inicio, fecha_cierre = :fecha_cierre,
                           tipo_seguridad = :tipo_seguridad,
                           banner_url = :banner_url, banner_modo = :banner_modo,
