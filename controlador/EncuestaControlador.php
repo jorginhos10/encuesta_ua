@@ -31,7 +31,7 @@ class EncuestaControlador {
         $usuario_id     = $_SESSION['user_id'];
 
         // Validar tipo_seguridad
-        $tiposValidos = ['publica', 'password', 'gmail_cualquiera', 'gmail_uniatlantico'];
+        $tiposValidos = ['publica', 'password', 'gmail_cualquiera', 'gmail_uniatlantico', 'correos_especificos'];
         if (!in_array($tipo_seguridad, $tiposValidos)) {
             $tipo_seguridad = 'publica';
         }
@@ -52,7 +52,22 @@ class EncuestaControlador {
             exit();
         }
 
-        if ($this->encuestaModelo->create($nombre, $fecha_inicio, $fecha_cierre, $usuario_id, $tipo_seguridad, $password)) {
+        $correos = [];
+        if ($tipo_seguridad === 'correos_especificos') {
+            list($correos, $invalidos) = EncuestaModelo::parsearCorreos($_POST['correos'] ?? '');
+            if (!empty($invalidos)) {
+                echo json_encode(['success' => false, 'message' => 'Correos no válidos: ' . implode(', ', array_slice($invalidos, 0, 5))]);
+                exit();
+            }
+            if (empty($correos)) {
+                echo json_encode(['success' => false, 'message' => 'Agrega al menos un correo autorizado']);
+                exit();
+            }
+        }
+
+        $nuevoId = $this->encuestaModelo->create($nombre, $fecha_inicio, $fecha_cierre, $usuario_id, $tipo_seguridad, $password);
+        if ($nuevoId) {
+            if ($tipo_seguridad === 'correos_especificos') $this->encuestaModelo->setCorreos($nuevoId, $correos);
             echo json_encode(['success' => true, 'message' => 'Encuesta creada exitosamente']);
         } else {
             echo json_encode(['success' => false, 'message' => 'Error al crear la encuesta']);
@@ -69,6 +84,9 @@ class EncuestaControlador {
         $encuesta = $this->encuestaModelo->getById($id);
 
         if ($encuesta && $encuesta['usuario_id'] == $_SESSION['user_id']) {
+            if (($encuesta['tipo_seguridad'] ?? '') === 'correos_especificos') {
+                $encuesta['correos'] = implode("\n", $this->encuestaModelo->getCorreos($encuesta['id']));
+            }
             echo json_encode(['success' => true, 'data' => $encuesta]);
         } else {
             echo json_encode(['success' => false, 'message' => 'Encuesta no encontrada']);
@@ -97,7 +115,7 @@ class EncuestaControlador {
         $opacidad_banner     = max(10, min(100, (int)($_POST['opacidad_banner']     ?? 100)));
         $opacidad_sidebar    = max(10, min(100, (int)($_POST['opacidad_sidebar']    ?? 100)));
 
-        $tiposValidos = ['publica', 'password', 'gmail_cualquiera', 'gmail_uniatlantico'];
+        $tiposValidos = ['publica', 'password', 'gmail_cualquiera', 'gmail_uniatlantico', 'correos_especificos'];
         if (!in_array($tipo_seguridad, $tiposValidos)) {
             $tipo_seguridad = 'publica';
         }
@@ -111,6 +129,19 @@ class EncuestaControlador {
         if (strtotime($fecha_inicio) >= strtotime($fecha_cierre)) {
             echo json_encode(['success' => false, 'message' => 'La fecha de inicio debe ser menor a la fecha de cierre']);
             exit();
+        }
+
+        $correos = null;
+        if ($tipo_seguridad === 'correos_especificos') {
+            list($correos, $invalidos) = EncuestaModelo::parsearCorreos($_POST['correos'] ?? '');
+            if (!empty($invalidos)) {
+                echo json_encode(['success' => false, 'message' => 'Correos no válidos: ' . implode(', ', array_slice($invalidos, 0, 5))]);
+                exit();
+            }
+            if (empty($correos)) {
+                echo json_encode(['success' => false, 'message' => 'Agrega al menos un correo autorizado']);
+                exit();
+            }
         }
 
         // Si pidieron cambiar password pero no la dieron y el tipo sigue siendo password
@@ -133,6 +164,7 @@ class EncuestaControlador {
         }
 
         if ($this->encuestaModelo->update($id, $nombre, $fecha_inicio, $fecha_cierre, $tipo_seguridad, $password, $cambiarPassword, $banner_url, $banner_modo, $background_url, $opacidad_formulario, $opacidad_banner, $opacidad_sidebar)) {
+            if ($correos !== null) $this->encuestaModelo->setCorreos($id, $correos);
             echo json_encode(['success' => true, 'message' => 'Encuesta actualizada exitosamente']);
         } else {
             echo json_encode(['success' => false, 'message' => 'Error al actualizar la encuesta']);

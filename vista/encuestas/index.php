@@ -331,10 +331,16 @@
                     <option value="password">🔒 Protegida con contraseña</option>
                     <option value="gmail_cualquiera">📧 Correo electrónico</option>
                     <option value="gmail_uniatlantico">🎓 Solo @mail.uniatlantico.edu.co</option>
+                    <option value="correos_especificos">📋 Correos específicos</option>
                 </select>
                 <div class="security-info" id="nueva_seg_info">
                     <i class="fas fa-info-circle"></i> Cualquier persona con el enlace podrá responder esta encuesta.
                 </div>
+            </div>
+            <div class="form-group" id="nueva_correos_wrap" style="display:none;">
+                <label class="form-label"><i class="fas fa-list-ul" style="color:var(--accent);margin-right:4px;"></i> Correos autorizados <span id="nueva_correos_count" style="font-weight:400;color:var(--text3);margin-left:6px;"></span></label>
+                <textarea class="form-input" id="nueva_correos" rows="6" placeholder="uno@correo.com&#10;otro@correo.com" oninput="contarCorreos('nueva')" style="resize:vertical;"></textarea>
+                <div class="form-hint"><i class="fas fa-info-circle"></i> Un correo por línea (o separados por coma). Solo ellos podrán responder y el informe mostrará cuántos respondieron.</div>
             </div>
             <div class="form-group" id="nueva_password_wrap" style="display:none;">
                 <label class="form-label"><i class="fas fa-key" style="color:var(--accent);margin-right:4px;"></i> Contraseña</label>
@@ -385,10 +391,16 @@
                     <option value="password">🔒 Protegida con contraseña</option>
                     <option value="gmail_cualquiera">📧 Correo electrónico</option>
                     <option value="gmail_uniatlantico">🎓 Solo @mail.uniatlantico.edu.co</option>
+                    <option value="correos_especificos">📋 Correos específicos</option>
                 </select>
                 <div class="security-info" id="editar_seg_info">
                     <i class="fas fa-info-circle"></i> Cualquier persona con el enlace podrá responder esta encuesta.
                 </div>
+            </div>
+            <div class="form-group" id="editar_correos_wrap" style="display:none;">
+                <label class="form-label"><i class="fas fa-list-ul" style="color:var(--accent);margin-right:4px;"></i> Correos autorizados <span id="editar_correos_count" style="font-weight:400;color:var(--text3);margin-left:6px;"></span></label>
+                <textarea class="form-input" id="editar_correos" rows="6" placeholder="uno@correo.com&#10;otro@correo.com" oninput="contarCorreos('editar')" style="resize:vertical;"></textarea>
+                <div class="form-hint"><i class="fas fa-info-circle"></i> Un correo por línea (o separados por coma). Solo ellos podrán responder y el informe mostrará cuántos respondieron.</div>
             </div>
             <div class="form-group" id="editar_password_wrap" style="display:none;">
                 <label class="form-label"><i class="fas fa-key" style="color:var(--accent);margin-right:4px;"></i> Contraseña</label>
@@ -544,7 +556,8 @@
         'publica': '<i class="fas fa-globe"></i> Cualquier persona con el enlace podrá responder esta encuesta.',
         'password': '<i class="fas fa-lock"></i> Los participantes deberán ingresar la contraseña para responder.',
         'gmail_cualquiera': '<i class="fas fa-envelope"></i> Cualquier correo electrónico válido podrá responder.',
-        'gmail_uniatlantico': '<i class="fas fa-graduation-cap"></i> Solo correos <strong>@mail.uniatlantico.edu.co</strong> podrán responder.'
+        'gmail_uniatlantico': '<i class="fas fa-graduation-cap"></i> Solo correos <strong>@mail.uniatlantico.edu.co</strong> podrán responder.',
+        'correos_especificos': '<i class="fas fa-list-ul"></i> Solo los correos que agregues podrán responder; el informe mostrará cuántos de ellos respondieron.'
     };
 
     function cargarEncuestas() {
@@ -692,11 +705,19 @@
         document.getElementById('nueva_password_wrap').style.display = (sel === 'password') ? 'block' : 'none';
         document.getElementById('nueva_seg_info').innerHTML = SEG_INFO[sel] || SEG_INFO['publica'];
         if (sel !== 'password') document.getElementById('nueva_password').value = '';
+        document.getElementById('nueva_correos_wrap').style.display = (sel === 'correos_especificos') ? 'block' : 'none';
+        contarCorreos('nueva');
+    }
+    function contarCorreos(pre) {
+        const n = (document.getElementById(pre+'_correos').value.match(/[^\s,;]+@[^\s,;]+/g) || []).length;
+        document.getElementById(pre+'_correos_count').textContent = n ? '(' + n + ')' : '';
     }
     function toggleEditarPassword() {
         const sel = document.getElementById('editar_seguridad').value;
         document.getElementById('editar_password_wrap').style.display = (sel === 'password') ? 'block' : 'none';
         document.getElementById('editar_seg_info').innerHTML = SEG_INFO[sel] || SEG_INFO['publica'];
+        document.getElementById('editar_correos_wrap').style.display = (sel === 'correos_especificos') ? 'block' : 'none';
+        contarCorreos('editar');
     }
 
     // ── Crear ──
@@ -706,6 +727,8 @@
         document.getElementById('nueva_cierre').value='';
         document.getElementById('nueva_seguridad').value='publica';
         document.getElementById('nueva_password').value='';
+        document.getElementById('nueva_correos').value='';
+        document.getElementById('nueva_correos_wrap').style.display='none';
         document.getElementById('nueva_password_wrap').style.display='none';
         document.getElementById('nueva_seg_info').innerHTML = SEG_INFO['publica'];
         document.getElementById('modalCrear').classList.add('open');
@@ -725,6 +748,11 @@
 
         const params = new URLSearchParams({nombre,fecha_inicio:inicio,fecha_cierre:cierre,tipo_seguridad});
         if(tipo_seguridad==='password') params.append('password', password);
+        if(tipo_seguridad==='correos_especificos'){
+            const correos=document.getElementById('nueva_correos').value;
+            if(!correos.trim()){toast('Agrega al menos un correo autorizado','error');return;}
+            params.append('correos', correos);
+        }
 
         fetch('index.php?action=encuestas&subaction=crear',{
             method:'POST',
@@ -787,6 +815,7 @@
             document.getElementById('editar_seguridad').value = seg;
             document.getElementById('editar_seguridad_actual').value = seg;
             document.getElementById('editar_password').value='';
+            document.getElementById('editar_correos').value = e.correos || '';
             // Banner y background
             document.getElementById('editar_banner_url').value = e.banner_url || '';
             document.getElementById('editar_banner_modo').value = e.banner_modo || 'enunciado';
@@ -833,6 +862,12 @@
         }
 
         const params = new URLSearchParams({id,nombre,fecha_inicio:inicio,fecha_cierre:cierre,tipo_seguridad,banner_url,banner_modo,background_url,opacidad_formulario,opacidad_banner,opacidad_sidebar});
+
+        if(tipo_seguridad==='correos_especificos'){
+            const correos=document.getElementById('editar_correos').value;
+            if(!correos.trim()){toast('Agrega al menos un correo autorizado','error');return;}
+            params.append('correos', correos);
+        }
 
         // Si el usuario escribió una contraseña nueva → mandar bandera para cambiarla
         if(tipo_seguridad==='password' && password.trim() !== ''){

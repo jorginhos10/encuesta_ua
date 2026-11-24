@@ -128,7 +128,7 @@ class RespuestaControlador {
             exit();
         }
 
-        if ($tipoSeg === 'gmail_cualquiera' || $tipoSeg === 'gmail_uniatlantico') {
+        if ($tipoSeg === 'gmail_cualquiera' || $tipoSeg === 'gmail_uniatlantico' || $tipoSeg === 'correos_especificos') {
             $nombre = isset($_POST['nombre']) ? trim($_POST['nombre']) : '';
             $email  = isset($_POST['email']) ? trim(strtolower($_POST['email'])) : '';
 
@@ -147,6 +147,12 @@ class RespuestaControlador {
                     echo json_encode(['success' => false, 'message' => 'Debes usar un correo @mail.uniatlantico.edu.co']);
                     exit();
                 }
+            }
+
+            // Correos específicos: solo los autorizados por el creador
+            if ($tipoSeg === 'correos_especificos' && !$this->encuestaModelo->correoPermitido($encuesta_id, $email)) {
+                echo json_encode(['success' => false, 'message' => 'Este correo no está autorizado para responder esta encuesta']);
+                exit();
             }
 
             // ¿Ya respondió?
@@ -256,7 +262,7 @@ class RespuestaControlador {
                 }
 
                 // Matriz (Importancia / Satisfacción por aspecto): guardar como JSON
-                if ($pregunta['tipo_pregunta'] === 'matriz') {
+                if (in_array($pregunta['tipo_pregunta'], ['matriz', 'matriz_dinamica'])) {
                     if (!is_array($value)) continue;
                     $cfg = json_decode($pregunta['opciones'] ?? '{}', true);
                     $filasDef = is_array($cfg['filas'] ?? null) ? array_values($cfg['filas']) : [];
@@ -488,7 +494,7 @@ class RespuestaControlador {
                         }
                     }
                     $estadisticas[$preg['id']] = ['tipo' => 'tinder', 'datos' => array_values($cardCounts)];
-                } elseif ($preg['tipo_pregunta'] === 'matriz') {
+                } elseif (in_array($preg['tipo_pregunta'], ['matriz', 'matriz_dinamica'])) {
                     $estadisticas[$preg['id']] = $this->estadisticasMatriz($encuesta_id, $preg);
                 } elseif ($preg['tipo_pregunta'] === 'satisfaccion') {
                     $rawData = $this->respuestaModelo->getEstadisticasByPregunta($encuesta_id, $preg['id']);
@@ -573,7 +579,7 @@ class RespuestaControlador {
                         'tipo'     => 'tinder',
                         'datos'    => array_values($cardCounts)
                     ];
-                } elseif ($preg['tipo_pregunta'] === 'matriz') {
+                } elseif (in_array($preg['tipo_pregunta'], ['matriz', 'matriz_dinamica'])) {
                     $estadisticas[$preg['id']] = $this->estadisticasMatriz($encuesta_id, $preg);
                 } elseif ($preg['tipo_pregunta'] === 'satisfaccion') {
                     $rawData = $this->respuestaModelo->getEstadisticasByPregunta($encuesta_id, $preg['id']);
@@ -655,6 +661,20 @@ class RespuestaControlador {
 
         $this->respuestaModelo->eliminarDuplicados($encuesta_id);
         $duplicados = $this->respuestaModelo->getDuplicados($encuesta_id);
+
+        // Métrica "X de Y" cuando la encuesta es de correos específicos
+        $metricaCorreos = null;
+        if (($encuesta['tipo_seguridad'] ?? '') === 'correos_especificos') {
+            $autorizados   = $this->encuestaModelo->getCorreos($encuesta_id);
+            $respondieron  = $this->respuestaModelo->getCorreosQueRespondieron($encuesta_id);
+            $respondieronAut = array_values(array_intersect($autorizados, $respondieron));
+            $metricaCorreos = [
+                'total'      => count($autorizados),
+                'respondio'  => count($respondieronAut),
+                'respondieron' => $respondieronAut,
+                'pendientes' => array_values(array_diff($autorizados, $respondieron)),
+            ];
+        }
 
         include __DIR__ . '/../vista/encuestas/informe.php';
     }

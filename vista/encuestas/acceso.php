@@ -91,6 +91,8 @@
                     <i class="fas fa-info-circle"></i> Esta encuesta requiere una contraseña proporcionada por el creador.
                 <?php elseif ($encuesta['tipo_seguridad'] === 'gmail_uniatlantico'): ?>
                     <i class="fas fa-info-circle"></i> Solo correos institucionales <strong>@mail.uniatlantico.edu.co</strong> pueden responder.
+                <?php elseif ($encuesta['tipo_seguridad'] === 'correos_especificos'): ?>
+                    <i class="fas fa-info-circle"></i> Solo pueden responder los correos autorizados por el creador de la encuesta.
                 <?php else: ?>
                     <i class="fas fa-info-circle"></i> Ingresa tu nombre y correo electrónico para responder esta encuesta.
                 <?php endif; ?>

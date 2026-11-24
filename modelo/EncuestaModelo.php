@@ -43,7 +43,7 @@ class EncuestaModelo {
         $stmt->bindParam(':tipo_seguridad', $tipo_seguridad);
         $stmt->bindParam(':password', $hashedPassword);
         
-        return $stmt->execute();
+        return $stmt->execute() ? (int)$this->conn->lastInsertId() : false;
     }
 
     public function update($id, $nombre, $fecha_inicio, $fecha_cierre, $tipo_seguridad = 'publica', $password = null, $cambiarPassword = false, $banner_url = '', $banner_modo = 'enunciado', $background_url = '', $opacidad_formulario = 100, $opacidad_banner = 100, $opacidad_sidebar = 100) {
@@ -85,6 +85,60 @@ class EncuestaModelo {
         $stmt->bindParam(':id', $id);
 
         return $stmt->execute();
+    }
+
+    // ── Correos específicos (lista de correos autorizados por encuesta) ──
+    private function asegurarTablaCorreos() {
+        $this->conn->exec("CREATE TABLE IF NOT EXISTS `encuesta_correos` (
+            `id`          INT          NOT NULL AUTO_INCREMENT,
+            `encuesta_id` INT          NOT NULL,
+            `email`       VARCHAR(150) NOT NULL,
+            `created_at`  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (`id`),
+            UNIQUE KEY `uq_encuesta_email` (`encuesta_id`, `email`),
+            CONSTRAINT `fk_encuesta_correos` FOREIGN KEY (`encuesta_id`) REFERENCES `encuestas` (`id`) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+    }
+
+    /** Convierte un texto (uno por línea, o separados por coma/;/espacio) en [correos_validos, invalidos]. */
+    public static function parsearCorreos($texto) {
+        $validos = []; $invalidos = [];
+        foreach (preg_split('/[\s,;]+/', (string)$texto, -1, PREG_SPLIT_NO_EMPTY) as $c) {
+            $c = strtolower(trim($c));
+            if (filter_var($c, FILTER_VALIDATE_EMAIL) && strlen($c) <= 150) $validos[$c] = true;
+            else $invalidos[] = $c;
+        }
+        return [array_keys($validos), $invalidos];
+    }
+
+    public function getCorreos($encuesta_id) {
+        $this->asegurarTablaCorreos();
+        $stmt = $this->conn->prepare("SELECT email FROM encuesta_correos WHERE encuesta_id = :id ORDER BY email");
+        $stmt->execute([':id' => $encuesta_id]);
+        return $stmt->fetchAll(PDO::FETCH_COLUMN);
+    }
+
+    public function setCorreos($encuesta_id, $correos) {
+        $this->asegurarTablaCorreos();
+        $this->conn->beginTransaction();
+        try {
+            $this->conn->prepare("DELETE FROM encuesta_correos WHERE encuesta_id = :id")->execute([':id' => $encuesta_id]);
+            $ins = $this->conn->prepare("INSERT INTO encuesta_correos (encuesta_id, email) VALUES (:id, :email)");
+            foreach ($correos as $c) $ins->execute([':id' => $encuesta_id, ':email' => $c]);
+            $this->conn->commit();
+            return true;
+        } catch (PDOException $e) {
+            $this->conn->rollBack();
+            error_log("Error al guardar correos: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function correoPermitido($encuesta_id, $email) {
+        $this->asegurarTablaCorreos();
+        $stmt = $this->conn->prepare("SELECT COUNT(*) FROM encuesta_correos WHERE encuesta_id = :id AND email = :email");
+        $stmt->execute([':id' => $encuesta_id, ':email' => strtolower(trim($email))]);
+        return (int)$stmt->fetchColumn() > 0;
     }
 
     public function verificarPassword($id, $password) {

@@ -47,6 +47,7 @@
         'tinder'            => 'Card Slider',
         'satisfaccion'      => 'Satisfacción (1-5)',
         'matriz'            => 'Matriz importancia/cumplimiento',
+        'matriz_dinamica'   => 'Matriz dinámica',
         'encabezado'        => 'Encabezado',
         'texto_ordinario'   => 'Informativo',
     ];
@@ -109,7 +110,7 @@
         </tr>
         <?php endforeach; ?>
 
-    <?php elseif ($tipo === 'matriz' && !empty($stats)): ?>
+    <?php elseif (in_array($tipo, ['matriz', 'matriz_dinamica']) && !empty($stats)): ?>
         <?php foreach ($stats as $mi => $mf): ?>
         <tr>
             <td></td>

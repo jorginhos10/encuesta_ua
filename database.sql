@@ -142,3 +142,18 @@ CREATE TABLE IF NOT EXISTS `respuestas_acceso` (
   CONSTRAINT `fk_acceso_encuesta`
     FOREIGN KEY (`encuesta_id`) REFERENCES `encuestas` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ------------------------------------------------------------
+-- 8. encuesta_correos  (correos autorizados: tipo_seguridad = 'correos_especificos')
+--    Tambien se crea sola la primera vez que se usa.
+-- ------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `encuesta_correos` (
+  `id`          INT          NOT NULL AUTO_INCREMENT,
+  `encuesta_id` INT          NOT NULL,
+  `email`       VARCHAR(150) NOT NULL,
+  `created_at`  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_encuesta_email` (`encuesta_id`, `email`),
+  CONSTRAINT `fk_encuesta_correos`
+    FOREIGN KEY (`encuesta_id`) REFERENCES `encuestas` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

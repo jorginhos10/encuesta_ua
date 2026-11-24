@@ -180,6 +180,38 @@ if(isset($_GET['debug']) && $_GET['debug'] == '1'){
         .sat-item.sat-selected .sat-num{color:var(--accent);}
         .sat-item.sat-selected .sat-label{color:var(--accent);}
         .mat-title{background:transparent;color:var(--text);font-weight:700;font-size:17px;letter-spacing:-.2px;padding:0 2px 12px;margin-bottom:0!important;}
+        /* ── Matriz dinámica (una a una) ── */
+        .dm{background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:18px;box-shadow:0 1px 3px rgba(0,0,0,.04),0 8px 24px rgba(0,0,0,.05);padding:18px 18px 14px;}
+        .dm-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;font-size:13px;color:#636366;}
+        .dm-count{font-weight:700;font-size:15px;color:var(--text);}
+        .dm-done b{color:var(--accent);}
+        .dm-bar{height:8px;background:#e9e9ef;border-radius:99px;overflow:hidden;margin-bottom:16px;}
+        .dm-fill{height:100%;width:0;background:linear-gradient(90deg,var(--accent),#5856d6);border-radius:99px;transition:width .4s ease;}
+        .dm-viewport{overflow:hidden;border-radius:12px;}
+        .dm-track{display:flex;transition:transform .45s cubic-bezier(.4,0,.2,1);}
+        .dm-slide{flex:0 0 100%;min-width:0;padding:4px 6px 8px;box-sizing:border-box;}
+        .dm-asp{font-size:20px;font-weight:700;letter-spacing:-.3px;color:var(--text);margin-bottom:4px;}
+        .dm-nec{font-size:14px;color:#636366;line-height:1.5;margin-bottom:6px;}
+        .dm-q{font-size:13px;font-weight:600;color:var(--accent);margin:16px 0 8px;}
+        .dm-faces{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
+        .dm-face{display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 4px;border:1.5px solid transparent;border-radius:14px;background:#f2f2f7;cursor:pointer;font-family:inherit;transition:transform .15s,background .15s,border-color .15s;}
+        .dm-face:hover{background:#e9e9ef;transform:translateY(-2px);}
+        .dm-emo{font-size:34px;line-height:1.1;filter:grayscale(.6);transition:filter .15s,transform .15s;}
+        .dm-num{font-size:12px;font-weight:700;color:#8e8e93;}
+        .dm-lbl{font-size:10.5px;line-height:1.2;color:#8e8e93;text-align:center;min-height:25px;}
+        .dm-face.sel{background:rgba(0,122,255,.1);border-color:var(--accent);}
+        .dm-face.sel .dm-emo{filter:none;transform:scale(1.2);}
+        .dm-face.sel .dm-num,.dm-face.sel .dm-lbl{color:var(--accent);}
+        .dm-na{display:block;margin:8px auto 0;padding:6px 16px;border:1.5px solid transparent;border-radius:99px;background:#f2f2f7;color:#8e8e93;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;}
+        .dm-na:hover{background:#e9e9ef;}
+        .dm-na.sel{background:rgba(0,122,255,.1);border-color:var(--accent);color:var(--accent);}
+        .dm-nav{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px;}
+        .dm-btn{padding:8px 14px;border:0;border-radius:10px;background:#f2f2f7;color:#1c1c1e;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;}
+        .dm-btn:hover:not(:disabled){background:#e9e9ef;}
+        .dm-btn:disabled{opacity:.35;cursor:default;}
+        .dm-msg{flex:1;text-align:center;font-size:12px;color:#ff3b30;}
+        .dm.dm-complete .dm-fill{background:linear-gradient(90deg,#34c759,#30b350);}
+        @media(max-width:480px){.dm-emo{font-size:26px;}.dm-lbl{font-size:9.5px;}.dm-asp{font-size:18px;}}
         .mat-wrap{overflow-x:auto;border:1px solid rgba(0,0,0,.08);border-radius:18px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.04),0 8px 24px rgba(0,0,0,.05);}
         .mat-table{width:100%;border-collapse:separate;border-spacing:0;font-size:14px;min-width:760px;}
         .mat-table th{padding:14px 16px;text-align:center;font-weight:600;font-size:12px;letter-spacing:.2px;color:#636366;background:rgba(246,246,248,.9);border-bottom:1px solid rgba(0,0,0,.08);vertical-align:middle;}
@@ -293,7 +325,7 @@ if(isset($_GET['debug']) && $_GET['debug'] == '1'){
                         // ── DETECCIÓN INTELIGENTE POR CONTENIDO ──
                         // Si el tipo está vacío o desconocido pero hay opciones JSON,
                         // intentamos inferir el tipo a partir del contenido.
-                        $tiposConocidos = ['texto_corto','texto_largo','seleccion_unica','seleccion_multiple','checkbox','tinder','satisfaccion','matriz','encabezado','texto_ordinario'];
+                        $tiposConocidos = ['texto_corto','texto_largo','seleccion_unica','seleccion_multiple','checkbox','tinder','satisfaccion','matriz','matriz_dinamica','encabezado','texto_ordinario'];
                         if(!in_array($preg['tipo_pregunta'], $tiposConocidos) && !empty($preg['opciones'])){
                             $testOpciones = json_decode($preg['opciones'], true);
                             // Soporte para doble-codificación JSON
@@ -426,7 +458,7 @@ if(isset($_GET['debug']) && $_GET['debug'] == '1'){
                                 </div>
                                 <?php else: ?>
                                 <!-- Preguntas normales -->
-                                <div class="q-label<?php echo $preg['tipo_pregunta']==='matriz' ? ' mat-title' : ''; ?>">
+                                <div class="q-label<?php echo in_array($preg['tipo_pregunta'], ['matriz','matriz_dinamica']) ? ' mat-title' : ''; ?>">
                                     <?php echo nl2br(textoConEnlaces($preg['pregunta'])); ?>
                                     <?php if($preg['requerido']): ?><span class="q-req">*</span><?php endif; ?>
                                     <?php if($esCond): ?><span class="q-badge"><i class="fas fa-code-branch"></i> Condicional</span><?php endif; ?>
@@ -474,7 +506,7 @@ if(isset($_GET['debug']) && $_GET['debug'] == '1'){
                                         </div>
                                         <?php endfor; ?>
                                     </div>
-                                <?php elseif($preg['tipo_pregunta'] === 'matriz'):
+                                <?php elseif(in_array($preg['tipo_pregunta'], ['matriz','matriz_dinamica'])):
                                     $matCfg = json_decode($preg['opciones'] ?? '{}', true);
                                     if(!is_array($matCfg)) $matCfg = [];
                                     $matFilas = is_array($matCfg['filas'] ?? null) ? $matCfg['filas'] : [];
@@ -489,6 +521,45 @@ if(isset($_GET['debug']) && $_GET['debug'] == '1'){
                                     $matColNecS = $matCfg['col_necesidad_sub'] ?? 'Lo que usted REQUIERE';
                                     $matReq = (!$esCond && $preg['requerido']) ? 'required' : '';
                                 ?>
+                                    <?php if($preg['tipo_pregunta'] === 'matriz_dinamica'): ?>
+                                    <?php $dmId = (int)$preg['id']; $dmN = count($matFilas); ?>
+                                    <div class="dm" id="dm-<?php echo $dmId; ?>" data-total="<?php echo $dmN; ?>" data-req="<?php echo $preg['requerido'] ? 1 : 0; ?>" data-cur="0">
+                                        <div class="dm-top">
+                                            <span class="dm-count">1 de <?php echo $dmN; ?></span>
+                                            <span class="dm-done"><b>0</b> de <?php echo $dmN; ?> respondidas</span>
+                                        </div>
+                                        <div class="dm-bar"><div class="dm-fill"></div></div>
+                                        <div class="dm-viewport">
+                                            <div class="dm-track">
+                                            <?php foreach(array_values($matFilas) as $mi => $mf): ?>
+                                                <div class="dm-slide" data-i="<?php echo $mi; ?>">
+                                                    <div class="dm-asp"><?php echo htmlspecialchars($mf['aspecto'] ?? ''); ?></div>
+                                                    <?php if(!empty($mf['necesidad'])): ?><div class="dm-nec"><?php echo htmlspecialchars($mf['necesidad']); ?></div><?php endif; ?>
+                                                    <?php foreach([['imp', $matColImp, $matEscImp], ['sat', $matColSat, $matEscSat]] as $dmCol): ?>
+                                                    <div class="dm-q"><?php echo htmlspecialchars($dmCol[1]); ?></div>
+                                                    <input type="hidden" class="dm-input" data-field="<?php echo $dmCol[0]; ?>" name="pregunta_<?php echo $dmId; ?>[<?php echo $mi; ?>][<?php echo $dmCol[0]; ?>]" value="" <?php echo $esCond ? 'disabled' : ''; ?>>
+                                                    <div class="dm-faces" data-field="<?php echo $dmCol[0]; ?>">
+                                                        <?php foreach([1,2,3,4,5] as $dmV): ?>
+                                                        <button type="button" class="dm-face" data-val="<?php echo $dmV; ?>" onclick="dmPick(this)">
+                                                            <span class="dm-emo"><?php echo $matCaras[(string)$dmV]; ?></span>
+                                                            <span class="dm-num"><?php echo $dmV; ?></span>
+                                                            <span class="dm-lbl"><?php echo htmlspecialchars($dmCol[2][(string)$dmV]); ?></span>
+                                                        </button>
+                                                        <?php endforeach; ?>
+                                                    </div>
+                                                    <button type="button" class="dm-na" data-val="na" onclick="dmPick(this)">No aplica</button>
+                                                    <?php endforeach; ?>
+                                                </div>
+                                            <?php endforeach; ?>
+                                            </div>
+                                        </div>
+                                        <div class="dm-nav">
+                                            <button type="button" class="dm-btn dm-prev" onclick="dmStep(<?php echo $dmId; ?>,-1)"><i class="fas fa-chevron-left"></i> Atrás</button>
+                                            <span class="dm-msg"></span>
+                                            <button type="button" class="dm-btn dm-next" onclick="dmStep(<?php echo $dmId; ?>,1)">Siguiente <i class="fas fa-chevron-right"></i></button>
+                                        </div>
+                                    </div>
+                                    <?php else: ?>
                                     <div class="mat-wrap">
                                     <table class="mat-table">
                                         <thead>
@@ -530,6 +601,7 @@ if(isset($_GET['debug']) && $_GET['debug'] == '1'){
                                         </tbody>
                                     </table>
                                     </div>
+                                    <?php endif; ?>
                                 <?php endif; ?>
                                 <?php endif; // fin else (no checkbox) ?>
                             <?php endif; // fin if(tinder)/else ?>
@@ -948,7 +1020,7 @@ function actualizarProgreso() {
         const sats = Array.from(row.querySelectorAll('input[data-satisfaccion]')).filter(i => i.value !== '');
         const mats = Array.from(row.querySelectorAll('select.mat-select'));
         mats.forEach(s => s.classList.toggle('mat-filled', s.value !== ''));
-        const matOk = mats.length > 0 && mats.every(s => s.value !== '');
+        const dmB = row.querySelector('.dm'); const matOk = dmB ? dmB.classList.contains('dm-complete') : (mats.length > 0 && mats.every(s => s.value !== ''));
         if (radios.length || checks.length || texts.length || sats.length || matOk) respondidas++;
     });
     const pct = total > 0 ? Math.round((respondidas / total) * 100) : 0;
@@ -1002,7 +1074,7 @@ function actualizarNav() {
                 const texts = Array.from(row.querySelectorAll('input[type="text"], textarea')).filter(i => i.value.trim() !== '');
                 const sats = Array.from(row.querySelectorAll('input[data-satisfaccion]')).filter(i => i.value !== '');
                 const mats = Array.from(row.querySelectorAll('select.mat-select'));
-                const matOk = mats.length > 0 && mats.every(s => s.value !== '');
+                const dmB = row.querySelector('.dm'); const matOk = dmB ? dmB.classList.contains('dm-complete') : (mats.length > 0 && mats.every(s => s.value !== ''));
                 respondida = checks.length > 0 || texts.length > 0 || sats.length > 0 || matOk;
             }
             if (respondida) navItem.classList.add('nav-answered');
@@ -1037,6 +1109,86 @@ function actualizarTiempo() {
     if (mS) mS.textContent = document.getElementById('t-sub').textContent;
 }
 
+// ========== MATRIZ DINÁMICA ==========
+function dmSlideDone(slide) {
+    return Array.from(slide.querySelectorAll('.dm-input')).every(i => i.value !== '');
+}
+function dmRefresh(box) {
+    const n = parseInt(box.dataset.total) || 0, cur = parseInt(box.dataset.cur) || 0;
+    const done = Array.from(box.querySelectorAll('.dm-slide')).filter(dmSlideDone).length;
+    box.querySelector('.dm-count').textContent = (cur + 1) + ' de ' + n;
+    box.querySelector('.dm-done').innerHTML = '<b>' + done + '</b> de ' + n + ' respondidas';
+    box.querySelector('.dm-fill').style.width = (n ? done * 100 / n : 0) + '%';
+    box.querySelector('.dm-prev').disabled = cur <= 0;
+    box.querySelector('.dm-next').disabled = cur >= n - 1;
+    box.classList.toggle('dm-complete', n > 0 && done === n);
+}
+function dmGo(id, i) {
+    const box = document.getElementById('dm-' + id);
+    if (!box) return;
+    const n = parseInt(box.dataset.total) || 0;
+    i = Math.max(0, Math.min(n - 1, i));
+    box.dataset.cur = i;
+    box.querySelector('.dm-track').style.transform = 'translateX(-' + (i * 100) + '%)';
+    box.querySelector('.dm-msg').textContent = '';
+    dmRefresh(box);
+}
+function dmStep(id, d) {
+    const box = document.getElementById('dm-' + id);
+    if (!box) return;
+    const cur = parseInt(box.dataset.cur) || 0;
+    if (d > 0) {
+        const slide = box.querySelectorAll('.dm-slide')[cur];
+        if (box.dataset.req === '1' && !dmSlideDone(slide)) {
+            box.querySelector('.dm-msg').textContent = 'Responde ambas preguntas para continuar';
+            return;
+        }
+    }
+    dmGo(id, cur + d);
+}
+function dmPick(btn) {
+    const box = btn.closest('.dm');
+    const slide = btn.closest('.dm-slide');
+    const grp = btn.parentElement.classList.contains('dm-faces') ? btn.parentElement : btn.previousElementSibling;
+    const field = grp.dataset.field;
+    const input = slide.querySelector('.dm-input[data-field="' + field + '"]');
+    if (!input || input.disabled) return;
+    input.value = btn.dataset.val;
+    grp.querySelectorAll('.dm-face').forEach(b => b.classList.toggle('sel', b === btn));
+    const na = grp.nextElementSibling;
+    if (na && na.classList.contains('dm-na')) na.classList.toggle('sel', na === btn);
+    box.querySelector('.dm-msg').textContent = '';
+    dmRefresh(box);
+    actualizarProgreso();
+    if (dmSlideDone(slide)) {
+        clearTimeout(slide._dmT);
+        slide._dmT = setTimeout(() => {
+            const i = parseInt(slide.dataset.i), n = parseInt(box.dataset.total);
+            if (i < n - 1 && parseInt(box.dataset.cur) === i) dmGo(box.id.replace('dm-', ''), i + 1);
+        }, 450);
+    }
+}
+function dmInit() {
+    document.querySelectorAll('.dm').forEach(box => dmGo(box.id.replace('dm-', ''), 0));
+    const form = document.getElementById('encuestaForm');
+    if (!form) return;
+    form.addEventListener('submit', e => {
+        for (const box of document.querySelectorAll('.dm')) {
+            const row = box.closest('.q-row');
+            if (row && row.classList.contains('oculta')) continue;
+            if (box.dataset.req !== '1') continue;
+            const idx = Array.from(box.querySelectorAll('.dm-slide')).findIndex(sl => !dmSlideDone(sl));
+            if (idx >= 0) {
+                e.preventDefault();
+                dmGo(box.id.replace('dm-', ''), idx);
+                box.querySelector('.dm-msg').textContent = 'Falta responder el aspecto ' + (idx + 1);
+                box.scrollIntoView({behavior: 'smooth', block: 'center'});
+                return;
+            }
+        }
+    });
+}
+
 // ========== EVENTOS ==========
 document.addEventListener('DOMContentLoaded', () => {
     actualizarTiempo();
@@ -1045,6 +1197,7 @@ document.addEventListener('DOMContentLoaded', () => {
     actualizarCondicionales();
     construirNav();
     actualizarProgreso();
+    dmInit();
 
     // Eventos para cambios en inputs
     document.querySelectorAll('input, textarea, select').forEach(el => {

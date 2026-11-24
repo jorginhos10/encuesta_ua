@@ -59,6 +59,17 @@ if (!class_exists('RespuestaModelo')) {
             return "CONCAT(ip_address,'||',COALESCE(usuario_respondio,''),'||',DATE_FORMAT(created_at,'%Y-%m-%d %H:%i:%s'))";
         }
 
+        /** Correos (en minúscula) de quienes ya enviaron la encuesta; usuario_respondio = "Nombre <correo>". */
+        public function getCorreosQueRespondieron($encuesta_id) {
+            $stmt = $this->conn->prepare("SELECT DISTINCT usuario_respondio FROM respuestas_encuesta WHERE encuesta_id = :id AND usuario_respondio IS NOT NULL");
+            $stmt->execute([':id' => $encuesta_id]);
+            $correos = [];
+            foreach ($stmt->fetchAll(PDO::FETCH_COLUMN) as $u) {
+                if (preg_match('/<([^<>]+)>\s*$/', $u, $m)) $correos[strtolower(trim($m[1]))] = true;
+            }
+            return array_keys($correos);
+        }
+
         public function getTotalRespuestas($encuesta_id) {
             $query = "SELECT COUNT(DISTINCT " . $this->sesionKey() . ") as total
                       FROM respuestas_encuesta

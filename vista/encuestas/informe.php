@@ -140,8 +140,24 @@ if(!isset($_SESSION['user_id'])){ header("Location: " . BASE_URL . "login"); exi
         <div class="stat-card"><div class="si blue"><i class="fas fa-users"></i></div><div><div class="sv"><?php echo $totalRespuestas; ?></div><div class="sl">Encuestas realizadas</div></div></div>
         <div class="stat-card"><div class="si green"><i class="fas fa-calendar-check"></i></div><div><div class="sv"><?php echo date('d/m',strtotime($encuesta['fecha_inicio'])); ?></div><div class="sl">Fecha inicio</div></div></div>
         <div class="stat-card"><div class="si orange"><i class="fas fa-calendar-times"></i></div><div><div class="sv"><?php echo date('d/m',strtotime($encuesta['fecha_cierre'])); ?></div><div class="sl">Fecha cierre</div></div></div>
+        <?php if(!empty($metricaCorreos)): ?>
+        <div class="stat-card"><div class="si blue"><i class="fas fa-envelope-open-text"></i></div><div><div class="sv"><?php echo $metricaCorreos['respondio']; ?> de <?php echo $metricaCorreos['total']; ?></div><div class="sl">Correos autorizados que respondieron</div></div></div>
+        <?php endif; ?>
         <div class="stat-card"><div class="si purple"><i class="fas fa-layer-group"></i></div><div><div class="sv"><?php echo count($encabezados); ?></div><div class="sl">Secciones</div></div></div>
     </div>
+
+    <?php if(!empty($metricaCorreos)): ?>
+    <div class="stat-card" style="display:block;margin-bottom:28px;">
+        <div style="font-weight:700;margin-bottom:10px;"><i class="fas fa-envelope-open-text" style="color:var(--accent);margin-right:6px;"></i>Participación por correo: <?php echo $metricaCorreos['respondio']; ?> de <?php echo $metricaCorreos['total']; ?> (<?php echo $metricaCorreos['total'] ? round($metricaCorreos['respondio']*100/$metricaCorreos['total']) : 0; ?>%)</div>
+        <details>
+            <summary style="cursor:pointer;font-size:13px;">Ver quién respondió y quién falta</summary>
+            <div style="display:flex;gap:24px;flex-wrap:wrap;margin-top:10px;font-size:13px;">
+                <div style="flex:1;min-width:220px;"><strong style="color:#34c759;">Respondieron (<?php echo count($metricaCorreos['respondieron']); ?>)</strong><br><?php echo $metricaCorreos['respondieron'] ? implode('<br>', array_map('htmlspecialchars', $metricaCorreos['respondieron'])) : '—'; ?></div>
+                <div style="flex:1;min-width:220px;"><strong style="color:#ff9500;">Pendientes (<?php echo count($metricaCorreos['pendientes']); ?>)</strong><br><?php echo $metricaCorreos['pendientes'] ? implode('<br>', array_map('htmlspecialchars', $metricaCorreos['pendientes'])) : '—'; ?></div>
+            </div>
+        </details>
+    </div>
+    <?php endif; ?>
 
     <?php if(!empty($respuestasPorFecha)): ?>
     <div class="chart-card" style="margin-bottom:28px;">
@@ -182,7 +198,7 @@ if(!isset($_SESSION['user_id'])){ header("Location: " . BASE_URL . "login"); exi
             $isTexto=in_array($preg['tipo_pregunta'],['texto_corto','texto_largo']);
             $isTinder=$preg['tipo_pregunta']==='tinder';
             $isCheckbox=$preg['tipo_pregunta']==='checkbox';
-            $tl=['texto_corto'=>'Texto corto','texto_largo'=>'Texto largo','seleccion_unica'=>'Selección única','seleccion_multiple'=>'Selección múltiple','checkbox'=>'Casilla','tinder'=>'Card Slider','satisfaccion'=>'Satisfacción','matriz'=>'Matriz importancia/satisfacción','encabezado'=>'Encabezado','texto_ordinario'=>'Informativo'][$preg['tipo_pregunta']]??$preg['tipo_pregunta'];
+            $tl=['texto_corto'=>'Texto corto','texto_largo'=>'Texto largo','seleccion_unica'=>'Selección única','seleccion_multiple'=>'Selección múltiple','checkbox'=>'Casilla','tinder'=>'Card Slider','satisfaccion'=>'Satisfacción','matriz'=>'Matriz importancia/satisfacción','matriz_dinamica'=>'Matriz dinámica','encabezado'=>'Encabezado','texto_ordinario'=>'Informativo'][$preg['tipo_pregunta']]??$preg['tipo_pregunta'];
         ?>
         <div class="qcard">
             <div class="qch">
@@ -282,7 +298,7 @@ if(!isset($_SESSION['user_id'])){ header("Location: " . BASE_URL . "login"); exi
                     </div>
                     <?php else: ?><div class="nodata"><i class="fas fa-inbox"></i>Sin respuestas aún</div><?php endif; ?>
 
-                <?php elseif($preg['tipo_pregunta'] === 'matriz'): ?>
+                <?php elseif(in_array($preg['tipo_pregunta'], ['matriz','matriz_dinamica'])): ?>
                     <?php $matTotal=$estadisticas[$preg['id']]['total']??0; ?>
                     <?php if($matTotal>0): ?>
                     <div style="overflow-x:auto;">
@@ -444,7 +460,7 @@ if(!isset($_SESSION['user_id'])){ header("Location: " . BASE_URL . "login"); exi
                             $displayR .= '<span class="td-badge '.$cls.'">'.$icon.' '.htmlspecialchars($d['titulo']).'</span>';
                         }
                     }
-                } elseif ($preg['tipo_pregunta'] === 'matriz') {
+                } elseif (in_array($preg['tipo_pregunta'], ['matriz','matriz_dinamica'])) {
                     $displayR = '';
                     $items = json_decode($r, true);
                     if (is_array($items)) {
