@@ -517,7 +517,7 @@ if(isset($_GET['debug']) && $_GET['debug'] == '1'){
                                     $matFilas = is_array($matCfg['filas'] ?? null) ? $matCfg['filas'] : [];
                                     $matColImp = $matCfg['col_importancia'] ?? '¿Qué tan IMPORTANTE es para usted?';
                                     $matColSat = $matCfg['col_satisfaccion'] ?? '¿Qué tanto se CUMPLE esta necesidad?';
-                                    $matCaras   = ['5'=>'😊','4'=>'🙂','3'=>'🫤','2'=>'🙁','1'=>'😞'];
+                                    $matCaras   = ['5'=>'😊','4'=>'🙂','3'=>'😐','2'=>'🙁','1'=>'😞'];
                                     $matEscImp = ['5'=>'Muy importante','4'=>'Importante','3'=>'Moderadamente importante','2'=>'Poco importante','1'=>'Nada importante','na'=>'No aplica'];
                                     $matEscSat = ['5'=>'Se cumple totalmente','4'=>'Cumple en gran parte','3'=>'Cumple parcialmente','2'=>'Cumple poco','1'=>'No se cumple','na'=>'No aplica'];
                                     $matColN    = $matCfg['col_n'] ?? 'N°';
