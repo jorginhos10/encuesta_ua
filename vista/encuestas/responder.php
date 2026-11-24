@@ -272,6 +272,9 @@ if(isset($_GET['debug']) && $_GET['debug'] == '1'){
     if($backgroundUrl !== '') $bodyStyle .= "--survey-bg:url('".htmlspecialchars($backgroundUrl)."');";
 ?>
 <body<?php if($backgroundUrl !== ''): ?> class="has-bg"<?php endif; ?> style="<?php echo $bodyStyle; ?>">
+<?php if(!empty($modoPrueba)): ?>
+<div style="position:sticky;top:0;z-index:999;background:#ff9500;color:#fff;text-align:center;font-size:13px;font-weight:600;padding:8px 12px;"><i class="fas fa-flask"></i> MODO PRUEBA: solo vista previa de las preguntas, las respuestas no se envían.</div>
+<?php endif; ?>
 <div class="progress-track"><div class="progress-fill" id="prog-fill"></div></div>
 <?php if($showBanner): ?>
 <div class="survey-banner-wrap">
@@ -620,7 +623,7 @@ if(isset($_GET['debug']) && $_GET['debug'] == '1'){
             </div>
 
             <div class="submit-sec">
-                <button type="submit" class="btn-submit" id="btn-submit">
+                <button type="submit" class="btn-submit" id="btn-submit"<?php echo !empty($modoPrueba) ? ' disabled' : ''; ?>>
                     <i class="fas fa-paper-plane"></i> Enviar Respuestas
                 </button>
                 <p class="submit-note"><i class="fas fa-lock" style="margin-right:4px;"></i> Tu respuesta es anónima y segura</p>
@@ -1101,13 +1104,15 @@ function actualizarTiempo() {
         document.getElementById('t-rest').textContent = 'Cerrada';
         document.getElementById('t-sub').textContent = 'No acepta más respuestas';
         document.getElementById('btn-submit').disabled = true;
-        document.querySelectorAll('#encuestaForm input, #encuestaForm textarea, #encuestaForm select').forEach(el => el.disabled = true);
+        if (!MODO_PRUEBA) document.querySelectorAll('#encuestaForm input, #encuestaForm textarea, #encuestaForm select').forEach(el => el.disabled = true);
     }
     const mR = document.getElementById('t-rest-mobile');
     const mS = document.getElementById('t-sub-mobile');
     if (mR) mR.textContent = document.getElementById('t-rest').textContent;
     if (mS) mS.textContent = document.getElementById('t-sub').textContent;
 }
+
+const MODO_PRUEBA = <?php echo !empty($modoPrueba) ? 'true' : 'false'; ?>;
 
 // ========== MATRIZ DINÁMICA ==========
 function dmSlideDone(slide) {
@@ -1173,6 +1178,7 @@ function dmInit() {
     const form = document.getElementById('encuestaForm');
     if (!form) return;
     form.addEventListener('submit', e => {
+        if (MODO_PRUEBA) { e.preventDefault(); return; }
         for (const box of document.querySelectorAll('.dm')) {
             const row = box.closest('.q-row');
             if (row && row.classList.contains('oculta')) continue;

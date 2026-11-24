@@ -19,7 +19,7 @@
         .access-header{padding:34px 32px 24px;text-align:center;border-bottom:1px solid var(--border);background:linear-gradient(135deg,rgba(0,122,255,.04),rgba(88,86,214,.04));}
         .lock-icon{width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,var(--accent),#5856d6);display:flex;align-items:center;justify-content:center;color:white;font-size:26px;margin:0 auto 18px;box-shadow:0 8px 20px rgba(0,122,255,.3);}
         .lock-icon.logo-mode{background:transparent;box-shadow:none;width:auto;height:auto;max-height:80px;}
-        .lock-icon.logo-mode img{max-height:80px;max-width:220px;object-fit:contain;}
+        .lock-icon.logo-mode img{max-height:80px;max-width:min(220px,70vw);width:auto;height:auto;object-fit:contain;display:block;}
         .access-eyebrow{font-size:11px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--accent);margin-bottom:6px;}
         .access-title{font-family:'DM Serif Display',serif;font-size:24px;letter-spacing:-.5px;line-height:1.25;color:var(--text);margin-bottom:6px;}
         .access-survey-name{font-size:14px;color:var(--text2);margin-top:8px;font-style:italic;}
@@ -52,7 +52,7 @@
 <body>
     <div class="access-card">
         <div class="access-header">
-            <div class="lock-icon<?php echo ($encuesta['tipo_seguridad'] === 'gmail_cualquiera') ? ' logo-mode' : ''; ?>">
+            <div class="lock-icon<?php echo !in_array($encuesta['tipo_seguridad'], ['password', 'gmail_uniatlantico']) ? ' logo-mode' : ''; ?>">
                 <?php if ($encuesta['tipo_seguridad'] === 'password'): ?>
                     <i class="fas fa-lock"></i>
                 <?php elseif ($encuesta['tipo_seguridad'] === 'gmail_uniatlantico'): ?>

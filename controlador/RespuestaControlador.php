@@ -34,7 +34,13 @@ class RespuestaControlador {
             exit();
         }
 
-        if ($encuesta['estado'] != 'activa') {
+        // Modo prueba (?test=yes): solo para el dueño de la encuesta con sesión iniciada.
+        // Muestra las preguntas sin pedir acceso ni exigir que esté activa, y no permite enviar.
+        $modoPrueba = (($_GET['test'] ?? '') === 'yes')
+            && isset($_SESSION['user_id'])
+            && $_SESSION['user_id'] == $encuesta['usuario_id'];
+
+        if ($encuesta['estado'] != 'activa' && !$modoPrueba) {
             echo "<h2>Esta encuesta no está disponible</h2>";
             echo "<p>La encuesta se encuentra en estado: " . $encuesta['estado'] . "</p>";
             echo "<p>Fecha de inicio: " . $encuesta['fecha_inicio'] . "</p>";
@@ -45,7 +51,7 @@ class RespuestaControlador {
 
         // ── VERIFICAR ACCESO SEGÚN TIPO DE SEGURIDAD ──
         $tipoSeg = $encuesta['tipo_seguridad'] ?? 'publica';
-        if ($tipoSeg !== 'publica') {
+        if ($tipoSeg !== 'publica' && !$modoPrueba) {
             // ¿Ya está validado para esta encuesta en la sesión?
             $sessKey = 'acceso_encuesta_' . $encuesta_id;
             if (!isset($_SESSION[$sessKey]) || $_SESSION[$sessKey] !== true) {
@@ -71,8 +77,13 @@ class RespuestaControlador {
             $encabezados[] = $enc;
         }
 
-        $submit_token = bin2hex(random_bytes(16));
-        $_SESSION['submit_token_' . $encuesta_id] = $submit_token;
+        if ($modoPrueba) {
+            // Sin token válido el servidor rechaza cualquier envío
+            $submit_token = '';
+        } else {
+            $submit_token = bin2hex(random_bytes(16));
+            $_SESSION['submit_token_' . $encuesta_id] = $submit_token;
+        }
 
         include __DIR__ . '/../vista/encuestas/responder.php';
     }
