@@ -53,7 +53,7 @@ if(isset($_GET['debug']) && $_GET['debug'] == '1'){
         .h-meta{display:flex;align-items:center;gap:14px;margin-top:10px;flex-wrap:wrap;}
         .h-chip{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2);background:var(--surface2);padding:4px 10px;border-radius:20px;}
         .h-chip i{color:var(--accent);font-size:10px;}
-        .layout{display:grid;grid-template-columns:1fr 260px;max-width:1060px;margin:0 auto;padding:24px 16px;gap:20px;align-items:start;}
+        .layout{display:grid;grid-template-columns:minmax(0,1fr) 260px;max-width:1060px;margin:0 auto;padding:24px 16px;gap:20px;align-items:start;}
         .section-card{background:var(--surface);border-radius:var(--r);box-shadow:var(--sh);border:1px solid var(--border);margin-bottom:16px;overflow:hidden;}
         .sec-label{padding:16px 22px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
         .sec-icon{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,var(--accent),#5856d6);display:flex;align-items:center;justify-content:center;color:white;font-size:13px;flex-shrink:0;}
@@ -181,24 +181,26 @@ if(isset($_GET['debug']) && $_GET['debug'] == '1'){
         .sat-item.sat-selected .sat-label{color:var(--accent);}
         .mat-title{background:transparent;color:var(--text);font-weight:700;font-size:17px;letter-spacing:-.2px;padding:0 2px 12px;margin-bottom:0!important;}
         /* ── Matriz dinámica (una a una) ── */
-        .dm{background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:18px;box-shadow:0 1px 3px rgba(0,0,0,.04),0 8px 24px rgba(0,0,0,.05);padding:18px 18px 14px;}
+        .layout>*{min-width:0;}
+        .dm{min-width:0;max-width:100%;background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:18px;box-shadow:0 1px 3px rgba(0,0,0,.04),0 8px 24px rgba(0,0,0,.05);padding:18px 18px 14px;}
         .dm-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;font-size:13px;color:#636366;}
         .dm-count{font-weight:700;font-size:15px;color:var(--text);}
         .dm-done b{color:var(--accent);}
         .dm-bar{height:8px;background:#e9e9ef;border-radius:99px;overflow:hidden;margin-bottom:16px;}
         .dm-fill{height:100%;width:0;background:linear-gradient(90deg,var(--accent),#5856d6);border-radius:99px;transition:width .4s ease;}
-        .dm-viewport{overflow:hidden;border-radius:12px;}
+        .dm-viewport{overflow:hidden;border-radius:12px;width:100%;contain:inline-size;}
         .dm-track{display:flex;transition:transform .45s cubic-bezier(.4,0,.2,1);}
-        .dm-slide{flex:0 0 100%;min-width:0;padding:4px 6px 8px;box-sizing:border-box;}
+        .dm-slide{flex:0 0 100%;width:100%;min-width:0;max-width:100%;padding:4px 6px 8px;box-sizing:border-box;}
         .dm-asp{font-size:20px;font-weight:700;letter-spacing:-.3px;color:var(--text);margin-bottom:4px;}
         .dm-nec{font-size:14px;color:#636366;line-height:1.5;margin-bottom:6px;}
         .dm-q{font-size:13px;font-weight:600;color:var(--accent);margin:16px 0 8px;}
-        .dm-faces{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
+        .dm-faces{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;}
+        .dm-sel-lbl{display:none;text-align:center;font-size:13px;font-weight:600;color:var(--accent);margin-top:8px;min-height:18px;}
         .dm-face{display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 4px;border:1.5px solid transparent;border-radius:14px;background:#f2f2f7;cursor:pointer;font-family:inherit;transition:transform .15s,background .15s,border-color .15s;}
         .dm-face:hover{background:#e9e9ef;transform:translateY(-2px);}
         .dm-emo{font-size:34px;line-height:1.1;filter:grayscale(.6);transition:filter .15s,transform .15s;}
         .dm-num{font-size:12px;font-weight:700;color:#8e8e93;}
-        .dm-lbl{font-size:10.5px;line-height:1.2;color:#8e8e93;text-align:center;min-height:25px;}
+        .dm-lbl{font-size:10.5px;line-height:1.2;color:#8e8e93;text-align:center;min-height:25px;overflow-wrap:anywhere;}
         .dm-face.sel{background:rgba(0,122,255,.1);border-color:var(--accent);}
         .dm-face.sel .dm-emo{filter:none;transform:scale(1.2);}
         .dm-face.sel .dm-num,.dm-face.sel .dm-lbl{color:var(--accent);}
@@ -211,7 +213,7 @@ if(isset($_GET['debug']) && $_GET['debug'] == '1'){
         .dm-btn:disabled{opacity:.35;cursor:default;}
         .dm-msg{flex:1;text-align:center;font-size:12px;color:#ff3b30;}
         .dm.dm-complete .dm-fill{background:linear-gradient(90deg,#34c759,#30b350);}
-        @media(max-width:480px){.dm-emo{font-size:26px;}.dm-lbl{font-size:9.5px;}.dm-asp{font-size:18px;}}
+        @media(max-width:600px){.dm{padding:14px 12px 12px;}.dm-faces{gap:5px;}.dm-face{padding:8px 2px;}.dm-emo{font-size:28px;}.dm-lbl{display:none;}.dm-sel-lbl{display:block;}.dm-asp{font-size:18px;}.dm-btn{padding:8px 10px;}}
         .mat-wrap{overflow-x:auto;border:1px solid rgba(0,0,0,.08);border-radius:18px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.04),0 8px 24px rgba(0,0,0,.05);}
         .mat-table{width:100%;border-collapse:separate;border-spacing:0;font-size:14px;min-width:760px;}
         .mat-table th{padding:14px 16px;text-align:center;font-weight:600;font-size:12px;letter-spacing:.2px;color:#636366;background:rgba(246,246,248,.9);border-bottom:1px solid rgba(0,0,0,.08);vertical-align:middle;}
@@ -256,7 +258,7 @@ if(isset($_GET['debug']) && $_GET['debug'] == '1'){
         .main-form .q-input,.main-form .q-textarea{background:rgb(255 255 255 / var(--op-formulario,1));}
         .main-form .opt-item,.main-form .checkbox-wrap{background:rgb(255 255 255 / var(--op-formulario,1));}
         .sidebar{opacity:var(--op-sidebar,1);}
-        @media(max-width:768px){.layout{grid-template-columns:1fr;}.sidebar{display:none;}.mobile-timer-strip{display:flex;}.mobile-nav-section{display:block;}}
+        @media(max-width:768px){.layout{grid-template-columns:minmax(0,1fr);}.sidebar{display:none;}.mobile-timer-strip{display:flex;}.mobile-nav-section{display:block;}}
     </style>
 </head>
 <?php
@@ -551,6 +553,7 @@ if(isset($_GET['debug']) && $_GET['debug'] == '1'){
                                                         <?php endforeach; ?>
                                                     </div>
                                                     <button type="button" class="dm-na" data-val="na" onclick="dmPick(this)">No aplica</button>
+                                                    <div class="dm-sel-lbl"></div>
                                                     <?php endforeach; ?>
                                                 </div>
                                             <?php endforeach; ?>
@@ -1162,6 +1165,8 @@ function dmPick(btn) {
     grp.querySelectorAll('.dm-face').forEach(b => b.classList.toggle('sel', b === btn));
     const na = grp.nextElementSibling;
     if (na && na.classList.contains('dm-na')) na.classList.toggle('sel', na === btn);
+    const selLbl = na && na.nextElementSibling;
+    if (selLbl) selLbl.textContent = btn.classList.contains('dm-na') ? 'No aplica' : (btn.querySelector('.dm-num').textContent + ' · ' + btn.querySelector('.dm-lbl').textContent);
     box.querySelector('.dm-msg').textContent = '';
     dmRefresh(box);
     actualizarProgreso();
