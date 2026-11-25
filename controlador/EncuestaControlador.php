@@ -171,6 +171,39 @@ class EncuestaControlador {
         }
     }
 
+    public function clonar() {
+        header('Content-Type: application/json');
+        if (!isset($_SESSION['user_id'])) {
+            echo json_encode(['success' => false, 'message' => 'No autorizado']);
+            exit();
+        }
+        $id           = isset($_POST['id']) ? intval($_POST['id']) : 0;
+        $nombre       = isset($_POST['nombre']) ? trim($_POST['nombre']) : '';
+        $fecha_inicio = isset($_POST['fecha_inicio']) ? $_POST['fecha_inicio'] : '';
+        $fecha_cierre = isset($_POST['fecha_cierre']) ? $_POST['fecha_cierre'] : '';
+
+        $encuesta = $this->encuestaModelo->getById($id);
+        if (!$encuesta || $encuesta['usuario_id'] != $_SESSION['user_id']) {
+            echo json_encode(['success' => false, 'message' => 'No autorizado']);
+            exit();
+        }
+        if ($nombre === '' || $fecha_inicio === '' || $fecha_cierre === '') {
+            echo json_encode(['success' => false, 'message' => 'Todos los campos son requeridos']);
+            exit();
+        }
+        if (strtotime($fecha_inicio) >= strtotime($fecha_cierre)) {
+            echo json_encode(['success' => false, 'message' => 'La fecha de inicio debe ser menor a la fecha de cierre']);
+            exit();
+        }
+        $nuevoId = $this->encuestaModelo->clonar($id, $nombre, $fecha_inicio, $fecha_cierre, $_SESSION['user_id']);
+        if ($nuevoId) {
+            echo json_encode(['success' => true, 'id' => $nuevoId, 'message' => 'Encuesta clonada exitosamente']);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'No se pudo clonar la encuesta']);
+        }
+        exit();
+    }
+
     public function eliminar() {
         if (!isset($_SESSION['user_id'])) {
             echo json_encode(['success' => false, 'message' => 'No autorizado']);

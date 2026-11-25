@@ -131,6 +131,8 @@
         .enc-btn-edit:hover{background:rgba(255,149,0,.18);}
         .enc-btn-del{background:rgba(255,59,48,.08);color:var(--red);}
         .enc-btn-del:hover{background:rgba(255,59,48,.15);}
+        .enc-btn-clone{background:rgba(175,82,222,.1);color:var(--purple);flex:0 0 auto;width:38px;padding:9px 0;}
+        .enc-btn-clone:hover{background:rgba(175,82,222,.2);}
         .enc-btn-reset{background:rgba(255,149,0,.08);color:var(--orange);flex:0 0 auto;width:38px;padding:9px 0;}
         .enc-btn-reset:hover{background:rgba(255,149,0,.18);}
         #reset-input{width:100%;padding:10px 13px;border:2px solid var(--border-strong);border-radius:10px;font-size:14px;font-family:inherit;outline:none;margin-top:12px;transition:border-color .15s;}
@@ -506,6 +508,38 @@
     </div>
 </div>
 
+<!-- Modal Clonar -->
+<div id="modalClonar" class="modal-overlay">
+    <div class="modal-box">
+        <div class="mh">
+            <span class="mh-title"><i class="fas fa-clone" style="color:var(--purple);margin-right:8px;"></i>Clonar encuesta</span>
+            <button class="mc" onclick="cerrarModalClonar()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="mb">
+            <p style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:14px;">Se copian las secciones, preguntas (con sus condiciones), el diseño y la seguridad. <strong>No se copian las respuestas.</strong></p>
+            <div class="form-group">
+                <label class="form-label">Nombre de la nueva encuesta</label>
+                <input class="form-input" type="text" id="clonar_nombre">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Fecha inicio</label>
+                    <input class="form-row-input" type="datetime-local" id="clonar_inicio">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Fecha cierre</label>
+                    <input class="form-row-input" type="datetime-local" id="clonar_cierre">
+                </div>
+            </div>
+        </div>
+        <div class="mf">
+            <input type="hidden" id="clonar_id">
+            <button class="btn btn-secondary" onclick="cerrarModalClonar()">Cancelar</button>
+            <button class="btn btn-primary" id="clonar_btn" onclick="confirmarClonar()"><i class="fas fa-clone"></i> Clonar</button>
+        </div>
+    </div>
+</div>
+
 <!-- Modal Reset Respuestas -->
 <div id="modalReset" class="modal-overlay">
     <div class="modal-box">
@@ -624,6 +658,7 @@
                     <button class="enc-btn enc-btn-build" onclick="construir(${enc.id})" title="Construir"><i class="fas fa-pen-nib"></i> Construir</button>
                     <button class="enc-btn enc-btn-report" onclick="verInforme(${enc.id})" title="Informe"><i class="fas fa-chart-bar"></i></button>
                     <button class="enc-btn enc-btn-link" onclick="verLink(${enc.id})" title="Enlace"><i class="fas fa-link"></i></button>
+                    <button class="enc-btn enc-btn-clone" onclick="abrirClonar(${enc.id})" title="Clonar encuesta"><i class="fas fa-clone"></i></button>
                     <button class="enc-btn enc-btn-reset" onclick="abrirReset(${enc.id},'${escapeHtml(enc.nombre)}')" title="Resetear respuestas"><i class="fas fa-eraser"></i></button>
                     <button class="enc-btn enc-btn-del" onclick="abrirEliminar(${enc.id},'${escapeHtml(enc.nombre)}')" title="Eliminar"><i class="fas fa-trash"></i></button>
                 </div>
@@ -887,6 +922,41 @@
         });
     }
 
+    // ── Clonar ──
+    function abrirClonar(id) {
+        const e = todasEncuestas.find(x => x.id == id);
+        if (!e) return;
+        document.getElementById('clonar_id').value = id;
+        document.getElementById('clonar_nombre').value = 'Copia de ' + e.nombre;
+        document.getElementById('clonar_inicio').value = e.fecha_inicio.replace(' ','T').substring(0,16);
+        document.getElementById('clonar_cierre').value = e.fecha_cierre.replace(' ','T').substring(0,16);
+        document.getElementById('modalClonar').classList.add('open');
+        const inp = document.getElementById('clonar_nombre');
+        setTimeout(() => { inp.focus(); inp.select(); }, 120);
+    }
+    function cerrarModalClonar() { document.getElementById('modalClonar').classList.remove('open'); }
+    function confirmarClonar() {
+        const id = document.getElementById('clonar_id').value;
+        const nombre = document.getElementById('clonar_nombre').value.trim();
+        const inicio = document.getElementById('clonar_inicio').value;
+        const cierre = document.getElementById('clonar_cierre').value;
+        if (!nombre || !inicio || !cierre) { toast('Completa todos los campos','error'); return; }
+        const btn = document.getElementById('clonar_btn');
+        btn.disabled = true;
+        fetch('index.php?action=encuestas&subaction=clonar', {
+            method:'POST',
+            headers:{'Content-Type':'application/x-www-form-urlencoded'},
+            body:new URLSearchParams({id, nombre, fecha_inicio:inicio, fecha_cierre:cierre})
+        })
+        .then(r=>r.json())
+        .then(d=>{
+            btn.disabled = false;
+            if (d.success) { toast('Encuesta clonada','success'); cerrarModalClonar(); cargarEncuestas(); }
+            else toast(d.message || 'Error al clonar','error');
+        })
+        .catch(()=>{ btn.disabled = false; toast('Error de conexión','error'); });
+    }
+
     // ── Reset Respuestas ──
     function abrirReset(id, nombre) {
         document.getElementById('reset_id').value = id;
@@ -944,7 +1014,7 @@
     function escapeHtml(t){const d=document.createElement('div');d.textContent=t;return d.innerHTML;}
 
     window.onclick=e=>{
-        ['modalCrear','modalEditar','modalLink','modalReset','modalEliminar'].forEach(id=>{
+        ['modalCrear','modalEditar','modalLink','modalClonar','modalReset','modalEliminar'].forEach(id=>{
             if(e.target===document.getElementById(id)) document.getElementById(id).classList.remove('open');
         });
     };

@@ -155,6 +155,77 @@ class EncuestaModelo {
         return (int)$stmt->fetchColumn() > 0;
     }
 
+    /**
+     * Clona una encuesta: configuración (seguridad, contraseña, banner, fondo, opacidades), correos autorizados,
+     * secciones y preguntas (con sus condiciones). NO copia respuestas ni accesos.
+     * @return int|false id de la nueva encuesta
+     */
+    public function clonar($id, $nombre, $fecha_inicio, $fecha_cierre, $usuario_id) {
+        $orig = $this->getById($id);
+        if (!$orig) return false;
+        // Antes de la transacción: getCorreos() puede crear la tabla (DDL = commit implícito en MySQL)
+        $correos = (($orig['tipo_seguridad'] ?? '') === 'correos_especificos') ? $this->getCorreos($id) : [];
+        $this->conn->beginTransaction();
+        try {
+            $stmt = $this->conn->prepare("INSERT INTO " . $this->table_name . "
+                (nombre, fecha_inicio, fecha_cierre, usuario_id, tipo_seguridad, password, banner_url, banner_modo,
+                 background_url, opacidad_formulario, opacidad_banner, opacidad_sidebar)
+                VALUES (:nombre, :ini, :cie, :uid, :seg, :pwd, :banner, :bmodo, :bg, :opf, :opb, :ops)");
+            $stmt->execute([
+                ':nombre' => $nombre, ':ini' => $fecha_inicio, ':cie' => $fecha_cierre, ':uid' => $usuario_id,
+                ':seg' => $orig['tipo_seguridad'], ':pwd' => $orig['password'],
+                ':banner' => $orig['banner_url'], ':bmodo' => $orig['banner_modo'], ':bg' => $orig['background_url'],
+                ':opf' => $orig['opacidad_formulario'], ':opb' => $orig['opacidad_banner'], ':ops' => $orig['opacidad_sidebar'],
+            ]);
+            $nuevoId = (int)$this->conn->lastInsertId();
+
+            // Correos autorizados
+            if ($correos) $this->setCorreosEnTransaccion($nuevoId, $correos);
+
+            // Secciones y preguntas
+            $encs = $this->conn->prepare("SELECT * FROM encabezados_encuesta WHERE encuesta_id = :id ORDER BY orden ASC, id ASC");
+            $encs->execute([':id' => $id]);
+            $insEnc = $this->conn->prepare("INSERT INTO encabezados_encuesta (encuesta_id, titulo, descripcion, orden) VALUES (:e, :t, :d, :o)");
+            $getPreg = $this->conn->prepare("SELECT * FROM preguntas WHERE encabezado_id = :id ORDER BY orden ASC, id ASC");
+            $insPreg = $this->conn->prepare("INSERT INTO preguntas
+                (encabezado_id, pregunta, tipo_pregunta, opciones, requerido, guardar_banco, orden, pregunta_padre_id, condicion_operador, condicion_valor)
+                VALUES (:enc, :preg, :tipo, :ops, :req, :banco, :orden, NULL, :cop, :cval)");
+            $mapa = []; $padres = [];
+            foreach ($encs->fetchAll(PDO::FETCH_ASSOC) as $enc) {
+                $insEnc->execute([':e' => $nuevoId, ':t' => $enc['titulo'], ':d' => $enc['descripcion'], ':o' => $enc['orden']]);
+                $nuevoEnc = (int)$this->conn->lastInsertId();
+                $getPreg->execute([':id' => $enc['id']]);
+                foreach ($getPreg->fetchAll(PDO::FETCH_ASSOC) as $p) {
+                    $insPreg->execute([
+                        ':enc' => $nuevoEnc, ':preg' => $p['pregunta'], ':tipo' => $p['tipo_pregunta'], ':ops' => $p['opciones'],
+                        ':req' => $p['requerido'], ':banco' => 0, ':orden' => $p['orden'],
+                        ':cop' => $p['condicion_operador'], ':cval' => $p['condicion_valor'],
+                    ]);
+                    $nuevaP = (int)$this->conn->lastInsertId();
+                    $mapa[(int)$p['id']] = $nuevaP;
+                    if (!empty($p['pregunta_padre_id'])) $padres[$nuevaP] = (int)$p['pregunta_padre_id'];
+                }
+            }
+            // Las condiciones apuntan a las preguntas nuevas
+            $upd = $this->conn->prepare("UPDATE preguntas SET pregunta_padre_id = :padre WHERE id = :id");
+            foreach ($padres as $nuevaP => $viejoPadre) {
+                if (isset($mapa[$viejoPadre])) $upd->execute([':padre' => $mapa[$viejoPadre], ':id' => $nuevaP]);
+            }
+            $this->conn->commit();
+            return $nuevoId;
+        } catch (Exception $e) {
+            if ($this->conn->inTransaction()) $this->conn->rollBack();
+            error_log("Error al clonar encuesta: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    // Inserta correos sin abrir otra transacción (se usa dentro de clonar)
+    private function setCorreosEnTransaccion($encuesta_id, $correos) {
+        $ins = $this->conn->prepare("INSERT IGNORE INTO encuesta_correos (encuesta_id, email) VALUES (:id, :email)");
+        foreach ($correos as $c) $ins->execute([':id' => $encuesta_id, ':email' => $c]);
+    }
+
     public function verificarPassword($id, $password) {
         $query = "SELECT password FROM " . $this->table_name . " WHERE id = :id LIMIT 1";
         $stmt = $this->conn->prepare($query);

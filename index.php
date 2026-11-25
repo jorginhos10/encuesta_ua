@@ -106,6 +106,9 @@ switch($action) {
         elseif($subaction == 'eliminar') {
             $encuestaControlador->eliminar();
         }
+        elseif($subaction == 'clonar') {
+            $encuestaControlador->clonar();
+        }
         elseif($subaction == 'resetear') {
             header('Content-Type: application/json');
             $id = isset($_POST['id']) ? intval($_POST['id']) : 0;
