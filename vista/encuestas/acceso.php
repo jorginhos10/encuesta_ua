@@ -33,6 +33,10 @@
         .form-input{width:100%;padding:13px 14px;border:1.5px solid var(--border-strong);border-radius:var(--rs);font-size:14px;font-family:inherit;color:var(--text);background:var(--surface);outline:none;transition:border-color .15s,box-shadow .15s;}
         .form-input:focus{border-color:var(--accent);box-shadow:0 0 0 4px var(--al);}
         .form-hint{font-size:11px;color:var(--text3);margin-top:5px;}
+        .email-fijo{display:flex;flex-wrap:wrap;border:1.5px solid var(--border-strong);border-radius:var(--rs);overflow:hidden;background:var(--surface);transition:border-color .15s,box-shadow .15s;}
+        .email-fijo:focus-within{border-color:var(--accent);box-shadow:0 0 0 4px var(--al);}
+        .email-fijo input{flex:1 1 110px;min-width:0;padding:13px 14px;border:0;outline:none;font-size:14px;font-family:inherit;color:var(--text);background:transparent;}
+        .email-dominio{flex:1 0 auto;display:flex;align-items:center;padding:11px 12px;background:var(--surface2);color:var(--text2);font-size:13px;font-weight:600;user-select:none;cursor:not-allowed;}
         .pwd-wrap{position:relative;}
         .pwd-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;}
         .pwd-toggle:hover{color:var(--accent);}
@@ -115,6 +119,18 @@
                     <label class="form-label"><i class="fas fa-user"></i> Nombre completo</label>
                     <input type="text" class="form-input" name="nombre" id="nombreInput" required placeholder="Ej: Juan Pérez García" maxlength="150" autofocus>
                 </div>
+                <?php if ($encuesta['tipo_seguridad'] === 'correos_especificos'): ?>
+                <div class="form-group">
+                    <label class="form-label" for="emailUsuario"><i class="fas fa-envelope"></i> Correo institucional</label>
+                    <div class="email-fijo">
+                        <input type="text" name="email_usuario" id="emailUsuario" required placeholder="tunombre" maxlength="100"
+                               autocomplete="off" autocapitalize="none" spellcheck="false"
+                               oninput="this.value=this.value.replace(/@.*$/,'').replace(/\s/g,'')">
+                        <span class="email-dominio" title="El dominio no se puede cambiar">@mail.uniatlantico.edu.co</span>
+                    </div>
+                    <div class="form-hint">Escribe solo la parte anterior a la <strong>@</strong></div>
+                </div>
+                <?php else: ?>
                 <div class="form-group">
                     <label class="form-label"><i class="fas fa-envelope"></i> Correo electrónico</label>
                     <input type="email" class="form-input" name="email" id="emailInput" required placeholder="<?php echo $encuesta['tipo_seguridad'] === 'gmail_uniatlantico' ? 'tunombre@mail.uniatlantico.edu.co' : 'tucorreo@ejemplo.com'; ?>" maxlength="150">
@@ -122,6 +138,7 @@
                     <div class="form-hint">Debe terminar en <strong>@mail.uniatlantico.edu.co</strong></div>
                     <?php endif; ?>
                 </div>
+                <?php endif; ?>
             <?php endif; ?>
 
             <button type="submit" class="btn-access" id="btnAccess">

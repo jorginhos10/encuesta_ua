@@ -140,6 +140,12 @@ class RespuestaControlador {
         if ($tipoSeg === 'gmail_cualquiera' || $tipoSeg === 'gmail_uniatlantico' || $tipoSeg === 'correos_especificos') {
             $nombre = isset($_POST['nombre']) ? trim($_POST['nombre']) : '';
             $email  = isset($_POST['email']) ? trim(strtolower($_POST['email'])) : '';
+            // Correos específicos: el formulario envía solo el usuario; el dominio institucional es fijo
+            if ($tipoSeg === 'correos_especificos') {
+                $usuario = trim(strtolower($_POST['email_usuario'] ?? ''));
+                $usuario = preg_replace('/@.*$/', '', $usuario);
+                $email = $usuario !== '' ? $usuario . '@mail.uniatlantico.edu.co' : '';
+            }
 
             if (empty($nombre) || strlen($nombre) < 2) {
                 echo json_encode(['success' => false, 'message' => 'Debes ingresar tu nombre completo']);
